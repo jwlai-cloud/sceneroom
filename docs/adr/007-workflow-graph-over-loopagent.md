@@ -110,6 +110,31 @@ the model. Here it lives in `decide_route`.
 Verified live: the Motorola handie-talkie became a period-correct police call
 box, verdict `fixed` on the first attempt. 47 unit tests.
 
+## Corroboration
+
+Google Cloud published *"ADK 2: Collaborative Multi-Agent Patterns"* on
+2026-08-15, after this port was made. It agrees on both counts:
+
+- It names `LoopAgent` a **deprecated loop construct** and offers Drafter +
+  Critic peer review as the replacement — structurally what this graph does.
+- Its decision matrix opens with *"Can I draw the complete flowchart on a
+  whiteboard before the user inputs anything?"* → if yes, use `Workflow` for
+  deterministic execution. Ours is drawable, and drawn:
+  [`sceneroom-agents.html`](../sceneroom-agents.html).
+
+One deliberate divergence. The article's Pattern 3 uses an **Agent** as the
+supervisor coordinating drafter and critic. Ours routes with a **function node**
+(`decide_route`). For a product whose claim is auditability, the decision to
+stop belongs in code — ADR 002 restated.
+
+The pattern the article names that we do **not** use is the
+Coordinator-Dispatcher, and deliberately: it applies when *the user's message*
+dictates which expert responds. Here the claim's *kind* does, decided by the
+Extractor and dispatched by a static map. A model-driven dispatcher would add
+nondeterminism exactly where it was removed on purpose.
+
+<https://medium.com/google-cloud/google-adk-2-collaborative-multi-agent-patterns-a-practical-guide-5c696ba556d2>
+
 ## What would change this
 
 Nothing about the shape. If the cycle ever needs to fan out — several revisions
