@@ -1,0 +1,174 @@
+<title>Sceneroom One-Pager</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1400px; min-height: 1940px; overflow: hidden;
+    background: #12100f; color: #ece8e4;
+    font-family: 'Source Serif 4', Georgia, serif;
+    padding: 64px 72px 76px;
+    background-image:
+      radial-gradient(110% 70% at 8% -8%, rgba(56,166,207,.15), transparent 58%),
+      radial-gradient(90% 60% at 100% 2%, rgba(237,187,0,.10), transparent 52%);
+  }
+  .mono { font-family: 'Courier Prime', monospace; }
+  .eyebrow { font-family: 'Courier Prime', monospace; font-size: 13px; letter-spacing: .24em;
+             text-transform: uppercase; color: #7d7979; font-weight: 700; }
+  h1 { font-size: 66px; line-height: 1.06; font-weight: 600; letter-spacing: -.015em; margin: 16px 0 0; }
+  h1 em { font-style: italic; color: #38a6cf; }
+  .lede { font-size: 23px; line-height: 1.45; color: #9b9797; max-width: 1080px; margin-top: 20px; }
+  .rule { height: 1px; background: #2d2b2b; margin: 40px 0; }
+
+  h2 { font-family: 'Courier Prime', monospace; font-size: 13px; letter-spacing: .2em;
+       text-transform: uppercase; color: #7d7979; font-weight: 700; margin-bottom: 22px; }
+
+  /* the problem / the wedge */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+           border: 1px solid #2d2b2b; border-radius: 3px; overflow: hidden; }
+  .split > div { padding: 28px 30px; }
+  .split > div + div { border-left: 1px solid #2d2b2b; background: rgba(56,166,207,.06); }
+  .split h3 { font-family: 'Courier Prime', monospace; font-size: 12px; letter-spacing: .2em;
+              text-transform: uppercase; font-weight: 700; margin-bottom: 16px; color: #7d7979; }
+  .split .live h3 { color: #38a6cf; }
+  .split li { list-style: none; font-size: 20px; line-height: 1.55; color: #9b9797; margin-bottom: 11px; }
+  .split li b { color: #ece8e4; font-weight: 600; }
+
+  /* pipeline */
+  .pipe { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+  .step { border: 1px solid #2d2b2b; border-radius: 3px; padding: 18px 16px 20px;
+          background: #171514; position: relative; }
+  .step .n { font-family: 'Courier Prime', monospace; font-size: 11px; color: #edbb00;
+             letter-spacing: .16em; font-weight: 700; }
+  .step .t { font-size: 19px; font-weight: 600; margin: 8px 0 6px; }
+  .step .d { font-size: 15px; line-height: 1.4; color: #8b8785; }
+  .step.key { border-color: #ff458e; background: rgba(255,69,142,.07); }
+  .step.key .n { color: #ff458e; }
+
+  /* numbers */
+  .nums { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+  .num { border-left: 2px solid #38a6cf; padding: 6px 0 6px 20px; }
+  .num .v { font-size: 44px; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .num .k { font-size: 16px; color: #8b8785; line-height: 1.35; margin-top: 6px; }
+  .num.amber { border-left-color: #edbb00; }
+  .num.flag { border-left-color: #ff458e; }
+
+  /* verdicts */
+  .verdicts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .v { border: 1px solid #2d2b2b; border-radius: 3px; padding: 16px 18px; }
+  .v .tag { font-family: 'Courier Prime', monospace; font-size: 11px; letter-spacing: .14em;
+            text-transform: uppercase; font-weight: 700; }
+  .v .x { font-size: 16px; color: #8b8785; line-height: 1.4; margin-top: 9px; }
+  .v.ok  { border-color: #2f6f52; } .v.ok  .tag { color: #56b98a; }
+  .v.no  { border-color: #7a2a49; } .v.no  .tag { color: #ff458e; }
+  .v.con { border-color: #7a5f16; } .v.con .tag { color: #edbb00; }
+  .v.un  .tag { color: #7d7979; }
+
+  /* stack */
+  .stack { display: flex; flex-wrap: wrap; gap: 9px; }
+  .chip { font-family: 'Courier Prime', monospace; font-size: 14px; border: 1px solid #2d2b2b;
+          border-radius: 2px; padding: 8px 13px; color: #9b9797; }
+  .chip.g { border-color: #2b5566; color: #7ec4de; }
+  .chip.p { border-color: #7a2a49; color: #ff8fb8; }
+
+  footer { margin-top: 42px; display: flex; justify-content: space-between; align-items: baseline;
+           border-top: 1px solid #2d2b2b; padding-top: 22px; }
+  footer .claim { font-size: 22px; color: #ece8e4; }
+  footer .url { font-family: 'Courier Prime', monospace; font-size: 15px; color: #7d7979; }
+</style>
+
+<span class="eyebrow">Agentic Cinema · Parallel track</span>
+<h1>Sceneroom — no unreviewed<br>claim <em>ships</em>.</h1>
+<p class="lede">
+  An agentic scene room for scripted production. The crew writes the scene, then holds it
+  to account: every checkable claim verified against the open web, contested history
+  refused rather than settled, every decision appended to a ledger. The output is a
+  production-ready scene <em>plus its provenance record</em>.
+</p>
+
+<div class="rule"></div>
+
+<h2>The problem &middot; and the part everyone skips</h2>
+<div class="split">
+  <div>
+    <h3>Any model with a search tool</h3>
+    <li>Tells you a claim looks wrong</li>
+    <li>Rules on it &mdash; including live disputes</li>
+    <li>Leaves nothing behind to audit</li>
+    <li>Does not write anything</li>
+  </div>
+  <div class="live">
+    <h3>Sceneroom</h3>
+    <li><b>Writes the scene</b>, then makes it prove itself</li>
+    <li><b>Refuses to rule</b> on contested history &mdash; routes it to a named human</li>
+    <li><b>Appends every call</b>: source, decider, reason</li>
+    <li><b>Re-checks the fix</b>, so a correction cannot smuggle in a new error</li>
+  </div>
+</div>
+
+<div class="rule"></div>
+
+<h2>One pass &middot; about thirty seconds, streamed while it happens</h2>
+<div class="pipe">
+  <div class="step"><div class="n">01</div><div class="t">Draft</div>
+    <div class="d">Brief &rarr; scene. Gemini on Vertex.</div></div>
+  <div class="step"><div class="n">02</div><div class="t">Extract</div>
+    <div class="d">Scene &rarr; typed, checkable claims.</div></div>
+  <div class="step"><div class="n">03</div><div class="t">Retrieve</div>
+    <div class="d">Parallel searches. The pipeline retrieves, not the model.</div></div>
+  <div class="step"><div class="n">04</div><div class="t">Judge</div>
+    <div class="d">Verifier, Rights, Fandom, Continuity &mdash; four questions.</div></div>
+  <div class="step key"><div class="n">05</div><div class="t">Route</div>
+    <div class="d">A pure function decides who a claim reaches.</div></div>
+  <div class="step"><div class="n">06</div><div class="t">Record</div>
+    <div class="d">Decision + reason appended to BigQuery.</div></div>
+</div>
+
+<div class="rule"></div>
+
+<h2>Four verdicts &mdash; the third one is the product</h2>
+<div class="verdicts">
+  <div class="v ok"><div class="tag">verified</div>
+    <div class="x">Sources support it as written.</div></div>
+  <div class="v no"><div class="tag">contradicted</div>
+    <div class="x">Sources disagree with the scene. A person decides what happens to it.</div></div>
+  <div class="v con"><div class="tag">contested</div>
+    <div class="x">Credible sources disagree with <em>each other</em>. The system states both positions and rules on neither.</div></div>
+  <div class="v un"><div class="tag">unverifiable</div>
+    <div class="x">Nothing found either way. Recorded as unsupported, never as true.</div></div>
+</div>
+
+<div class="rule"></div>
+
+<h2>Measured, not asserted</h2>
+<div class="nums">
+  <div class="num"><div class="v">13/15</div>
+    <div class="k">eval claims with known answers, correct</div></div>
+  <div class="num flag"><div class="v">0</div>
+    <div class="k">wrong calls &mdash; a miss costs a decision, a wrong call ships an error</div></div>
+  <div class="num amber"><div class="v">7</div>
+    <div class="k">agents, streaming their real timings over SSE</div></div>
+  <div class="num"><div class="v">~$0</div>
+    <div class="k">idle cost: Cloud Run at min-instances 0, live for the judging window</div></div>
+</div>
+
+<div class="rule"></div>
+
+<h2>How it is built</h2>
+<div class="stack">
+  <span class="chip g">Vertex AI &middot; gemini-flash-latest</span>
+  <span class="chip g">google-adk 2.6.1</span>
+  <span class="chip g">ADK Workflow graphs &times;2</span>
+  <span class="chip g">Cloud Run</span>
+  <span class="chip g">BigQuery &middot; append-only</span>
+  <span class="chip g">Secret Manager</span>
+  <span class="chip g">Gemini image</span>
+  <span class="chip p">Parallel Search API</span>
+  <span class="chip p">Parallel MCP server</span>
+  <span class="chip">FastAPI &middot; SSE</span>
+  <span class="chip">pure-function escalation, unit tested</span>
+</div>
+
+<footer>
+  <span class="claim">It does not promise your scene is correct &mdash; only that no claim shipped unreviewed.</span>
+  <span class="url">sceneroom-320877670799.us-central1.run.app</span>
+</footer>

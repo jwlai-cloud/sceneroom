@@ -4,7 +4,7 @@ _Deadline **2026-09-07 14:00 PT**. Judging **2026-09-23 → 10-07**, so the URL
 must survive into October._
 
 **Live:** <https://sceneroom-320877670799.us-central1.run.app> · access code is
-on the submission page · revision `sceneroom-00021-244`
+on the submission page · revision `sceneroom-00024-qjc`
 
 ## Done
 
@@ -25,7 +25,9 @@ on the submission page · revision `sceneroom-00021-244`
 | Docs | `ARCHITECTURE.md`, 7 ADRs, `SUBMISSION.md`, `VIDEO.md` |
 | Devpost thumbnail | `docs/sceneroom-thumbnail.jpg`, 1200×800 |
 | Teaching artefact | `tutorial.html` — navigable page, + `TUTORIAL.md` |
-| Diagrams | topology + handshake sequence, both 9/9 showcase checks |
+| Diagrams | topology, handshake sequence, deployed infrastructure — all 9/9 showcase checks |
+| One-pager | `docs/onepager.html` + PNG — problem, pipeline, verdicts, numbers, stack |
+| Gallery images | `docs/img/*.png`, six renders + `sceneroom-submission-pack.zip` |
 | Revise graph | ✅ ADK `Workflow` — reviser → critic → route, retry once |
 | Check graph | ✅ ADK `Workflow` — one dynamic node fans out over however many claims |
 | ADK / scaffold | ✅ 2.6.1, migrated to `agents-cli-manifest.yaml` |
