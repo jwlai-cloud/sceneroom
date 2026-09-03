@@ -1,0 +1,356 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Sceneroom \u2014 deployed infrastructure",
+    "subtitle": "One Cloud Run service that idles at ~$0, holds no key material, and reaches the open web through exactly one vendor.",
+    "output": "sceneroom-infra.html",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1420,
+      800
+    ],
+    "views": [
+      {
+        "id": "request",
+        "label": "A request arrives",
+        "focus": [
+          "browser",
+          "gate",
+          "run"
+        ],
+        "note": "EventSource opens a GET; the cookie gate stands in front of every endpoint that spends money."
+      },
+      {
+        "id": "egress",
+        "label": "Where it reaches out",
+        "focus": [
+          "run",
+          "vertex",
+          "parallelApi",
+          "parallelMcp"
+        ],
+        "note": "Gemini for reasoning, Parallel for evidence. Nothing else leaves the service."
+      },
+      {
+        "id": "identity",
+        "label": "Identity and secrets",
+        "focus": [
+          "run",
+          "secrets",
+          "identity",
+          "ledger"
+        ],
+        "note": "Secrets arrive as environment variables; Vertex authenticates as the service account, with no key on disk."
+      }
+    ],
+    "repository": {
+      "url": "https://github.com/jwlai-cloud/sceneroom",
+      "revision": "b27d5f80d6ec5c222cdc2f3894d42abbcb5c7697"
+    }
+  },
+  "components": [
+    {
+      "id": "browser",
+      "type": "frontend",
+      "label": "Scene room",
+      "sublabel": "browser \u00b7 EventSource",
+      "pos": [
+        40,
+        313
+      ],
+      "size": [
+        170,
+        70
+      ],
+      "sources": [
+        {
+          "path": "frontend/app.js",
+          "label": "SSE client"
+        }
+      ]
+    },
+    {
+      "id": "gate",
+      "type": "security",
+      "label": "Access gate",
+      "sublabel": "cookie \u00b7 constant-time",
+      "pos": [
+        330,
+        313
+      ],
+      "size": [
+        170,
+        70
+      ],
+      "sources": [
+        {
+          "path": "app/fast_api_app.py",
+          "label": "require_access"
+        }
+      ]
+    },
+    {
+      "id": "build",
+      "type": "cloud",
+      "label": "Cloud Build",
+      "sublabel": "+ Artifact Registry",
+      "pos": [
+        290,
+        90
+      ],
+      "size": [
+        170,
+        70
+      ]
+    },
+    {
+      "id": "run",
+      "type": "backend",
+      "label": "Cloud Run \u00b7 sceneroom",
+      "sublabel": "FastAPI \u00b7 min 0 / max 3 \u00b7 600s",
+      "pos": [
+        540,
+        300
+      ],
+      "size": [
+        200,
+        96
+      ],
+      "sources": [
+        {
+          "path": "Dockerfile"
+        },
+        {
+          "path": "app/fast_api_app.py"
+        }
+      ]
+    },
+    {
+      "id": "secrets",
+      "type": "security",
+      "label": "Secret Manager",
+      "sublabel": "injected as env vars",
+      "pos": [
+        430,
+        500
+      ],
+      "size": [
+        170,
+        70
+      ]
+    },
+    {
+      "id": "identity",
+      "type": "security",
+      "label": "sceneroom-run",
+      "sublabel": "least-privilege account",
+      "pos": [
+        650,
+        500
+      ],
+      "size": [
+        170,
+        70
+      ]
+    },
+    {
+      "id": "vertex",
+      "type": "cloud",
+      "label": "Vertex AI",
+      "sublabel": "gemini-flash-latest \u00b7 flash-image",
+      "pos": [
+        860,
+        90
+      ],
+      "size": [
+        200,
+        80
+      ],
+      "sources": [
+        {
+          "path": "app/agents/verifier.py",
+          "label": "one of seven LlmAgents"
+        }
+      ]
+    },
+    {
+      "id": "ledger",
+      "type": "database",
+      "label": "BigQuery",
+      "sublabel": "sceneroom \u00b7 append-only",
+      "pos": [
+        860,
+        600
+      ],
+      "size": [
+        200,
+        80
+      ],
+      "sources": [
+        {
+          "path": "app/services/ledger.py"
+        }
+      ]
+    },
+    {
+      "id": "parallelApi",
+      "type": "external",
+      "label": "Parallel Search",
+      "sublabel": "/v1beta/search",
+      "pos": [
+        1140,
+        240
+      ],
+      "size": [
+        190,
+        80
+      ],
+      "sources": [
+        {
+          "path": "app/services/parallel_client.py"
+        }
+      ]
+    },
+    {
+      "id": "parallelMcp",
+      "type": "external",
+      "label": "Parallel MCP",
+      "sublabel": "search.parallel.ai/mcp",
+      "pos": [
+        1140,
+        380
+      ],
+      "size": [
+        190,
+        80
+      ],
+      "sources": [
+        {
+          "path": "app/services/parallel_mcp.py"
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Google Cloud \u00b7 agent-era \u00b7 us-central1",
+      "wraps": [
+        "gate",
+        "build",
+        "run",
+        "secrets",
+        "identity",
+        "vertex",
+        "ledger"
+      ]
+    },
+    {
+      "kind": "security-group",
+      "label": "No key material in the container",
+      "wraps": [
+        "run",
+        "secrets",
+        "identity"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "open",
+      "from": "browser",
+      "to": "gate",
+      "label": "brief + bible",
+      "variant": "emphasis"
+    },
+    {
+      "id": "admit",
+      "from": "gate",
+      "to": "run",
+      "variant": "security"
+    },
+    {
+      "id": "reason",
+      "from": "run",
+      "to": "vertex",
+      "label": "structured output"
+    },
+    {
+      "id": "search",
+      "from": "run",
+      "to": "parallelApi",
+      "label": "search per claim",
+      "variant": "emphasis"
+    },
+    {
+      "id": "mcp",
+      "from": "run",
+      "to": "parallelMcp",
+      "label": "web_search / web_fetch",
+      "variant": "dashed"
+    },
+    {
+      "id": "append",
+      "from": "run",
+      "to": "ledger",
+      "label": "verdict + decision"
+    },
+    {
+      "id": "inject",
+      "from": "secrets",
+      "to": "run",
+      "label": "API key, access code",
+      "variant": "security",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "assume",
+      "from": "identity",
+      "to": "run",
+      "label": "runtime identity",
+      "variant": "security",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "deploy",
+      "from": "build",
+      "to": "run",
+      "label": "deploy --source",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Why Cloud Run, not Agent Engine",
+      "items": [
+        "min-instances 0 idles at about zero",
+        "The URL has to survive nine weeks of judging on a small credit",
+        "max-instances 3 caps what a public URL can spend"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Nothing secret is in the image",
+      "items": [
+        "Secret Manager injects the key at start, never baked in",
+        "Vertex authenticates through the metadata server",
+        "The runtime account holds WRITER on one dataset and nothing else"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "One route to the open web",
+      "items": [
+        "Parallel is the only external egress in the service",
+        "The Search API is called by the pipeline, per claim",
+        "The MCP server is handed to exactly one agent"
+      ]
+    }
+  ]
+}
