@@ -27,8 +27,8 @@ pulled from the demo at the payoff frame.
 
 In June 2026, MBC's *21st Century Grand Princess* drew sustained criticism for
 verification errors and historical distortion. The production team and cast
-issued public apologies and **scenes were deleted from the broadcast**. Those
-are post-air costs for a pre-air failure.
+issued public apologies, and the argument carried on online well after the
+apology. Those are post-air costs for a pre-air failure.
 
 The interesting part is who caught it: **viewers**. Fans are the industry's de
 facto continuity QA — they maintain the wikis, track the props, and litigate the

@@ -34,7 +34,7 @@ from google.adk.agents import LlmAgent
 from pydantic import BaseModel, Field
 
 from app.config import MODEL
-from app.models import Claim, Mode, Verdict
+from app.models import Claim, ClaimKind, Mode, Verdict
 
 
 class HandoffNote(BaseModel):
@@ -103,6 +103,11 @@ def route(claim: Claim, mode: Mode) -> tuple[bool, str]:
         return True, "Sources contradict the scene. A person decides what happens to it."
 
     if claim.verdict == Verdict.UNVERIFIABLE:
+        # A rights position nobody could establish is exposure, not an
+        # unsupported detail — and the check itself says "refer to the clearance
+        # desk". It has to actually reach one, in every mode.
+        if claim.kind == ClaimKind.RIGHTS:
+            return True, "The rights position could not be established. Clearance decides this."
         # Strict productions cannot let an unsupported claim through; fiction can
         # carry one as a choice. Same engine, different threshold (PRD §2).
         if mode == Mode.DOCUMENTARY:

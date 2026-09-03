@@ -259,12 +259,23 @@ function longText(label, text, italic) {
     </details>`;
 }
 
+// Escaping alone still lets `javascript:` through an href. Source URLs arrive
+// from search results, so they are not ours to trust.
+const safeUrl = (u) => {
+  try {
+    const parsed = new URL(String(u ?? ""), window.location.origin);
+    return ["http:", "https:"].includes(parsed.protocol) ? parsed.href : "";
+  } catch {
+    return "";
+  }
+};
+
 function sourceList(sources) {
   if (!sources?.length) return "";
   return `<ul class="sources">${sources
     .map(
       (s) => `<li><span>↗</span
-              ><a class="title" href="${esc(s.url)}" target="_blank" rel="noopener"
+              ><a class="title" href="${esc(safeUrl(s.url))}" target="_blank" rel="noopener"
                  title="${esc(s.title)}">${esc(s.title)}</a
               ><span class="host">${esc(host(s.url))}</span></li>`,
     )

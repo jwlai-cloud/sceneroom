@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import difflib
 import logging
 import uuid
 
@@ -353,6 +354,7 @@ async def _check_continuity(scene: Scene, tracker: RunTracker | None) -> None:
         )
         out = await run_agent(build_continuity(), prompt)
         conflicts = out.get("conflicts") or []
+        unmatched: list[str] = []
 
         for raw in conflicts:
             text = str(raw.get("claim_text", "")).strip().lower()
@@ -361,6 +363,15 @@ async def _check_continuity(scene: Scene, tracker: RunTracker | None) -> None:
                 None,
             )
             if match is None:
+                # The model echoed a conflict we cannot tie to a line. Dropping
+                # it would mark the very claim it is about as consistent, so
+                # fall back to the closest canon claim by text.
+                near = difflib.get_close_matches(
+                    text, [c.text.lower() for c in canon], n=1, cutoff=0.6
+                )
+                match = next((c for c in canon if c.text.lower() == near[0]), None) if near else None
+            if match is None:
+                unmatched.append(str(raw.get("bible_says", "")) or text)
                 continue
             match.verdict = Verdict.CONTRADICTED
             match.bible_says = str(raw.get("bible_says", ""))
@@ -368,12 +379,23 @@ async def _check_continuity(scene: Scene, tracker: RunTracker | None) -> None:
 
         for claim in canon:
             if claim.verdict is None:
-                claim.verdict = Verdict.VERIFIED
-                claim.reasoning = "Consistent with the production bible."
+                if unmatched:
+                    # Continuity found something and we could not localise it.
+                    # Saying "consistent with the bible" here would be a claim
+                    # we cannot support.
+                    claim.verdict = Verdict.UNVERIFIABLE
+                    claim.reasoning = (
+                        "Continuity reported a conflict it could not tie to a specific "
+                        "line. This claim was not cleared."
+                    )
+                else:
+                    claim.verdict = Verdict.VERIFIED
+                    claim.reasoning = "Consistent with the production bible."
 
         _detail(
             step,
             f"{len(conflicts)} conflict(s) across {len(canon)} canon claims"
+            + (f", {len(unmatched)} not tied to a line" if unmatched else "")
             if conflicts
             else f"{len(canon)} canon claims consistent with the bible",
         )
@@ -441,6 +463,17 @@ async def check_claims(scene: Scene, tracker: RunTracker | None = None) -> Scene
         else:
             await _check_fandom(claim, sc)
 
+    # `run_agent_state` logs and returns {} on failure, which is right for a
+    # single agent and wrong for this one: a check phase that dies before
+    # adjudicating leaves every claim unrouted, and the scene would be saved
+    # and rendered as though it had passed. Prove adjudication ran.
+    adjudicated = False
+
+    async def adjudicate() -> None:
+        nonlocal adjudicated
+        await _adjudicate(scene, tracker)
+        adjudicated = True
+
     workflow = build_check_workflow(
         scene=scene,
         checkers={
@@ -449,11 +482,16 @@ async def check_claims(scene: Scene, tracker: RunTracker | None = None) -> Scene
             "rights": _check_rights,
         },
         continuity=lambda: _check_continuity(scene, tracker),
-        adjudicate=lambda: _adjudicate(scene, tracker),
+        adjudicate=adjudicate,
         step=lambda name: _step(tracker, name),
         note=lambda name, detail: tracker.note(name, detail) if tracker else None,
     )
     await run_agent_state(workflow, scene.id)
+    if not adjudicated:
+        raise RuntimeError(
+            "The check phase did not finish, so no claim was routed. "
+            "Refusing to return a scene that would look reviewed."
+        )
 
 
     get_ledger().save_scene(scene)

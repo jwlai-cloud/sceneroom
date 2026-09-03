@@ -30,9 +30,9 @@ BEATS: list[dict] = [
         "id": "problem",
         "hold": 5,
         "text": (
-            "In June, a Korean drama apologised on air and cut scenes after "
-            "broadcast. Viewers caught errors the production missed. But nobody "
-            "could tell which deviations were deliberate."
+            "In June, a Korean drama apologised on air after viewers caught "
+            "historical errors the production missed. The apology did not end "
+            "it. And nobody could tell which deviations were deliberate."
         ),
     },
     {
@@ -49,19 +49,19 @@ BEATS: list[dict] = [
         "id": "walkthrough",
         "hold": 8,
         "text": (
-            "The shape is one pass. A brief becomes a draft. The draft becomes a "
-            "list of checkable claims. Every claim gets evidence, a verdict, and "
-            "a route. What the room cannot settle goes to a human."
+            "The shape is one pass. A brief becomes a draft, the draft a list of "
+            "checkable claims. Every claim gets evidence, a verdict, and a "
+            "route. What the room cannot settle goes to a human."
         ),
     },
     {
         "id": "parallel",
         "hold": 8,
         "text": (
-            "Evidence comes from Parallel, two ways. The pipeline searches, then "
-            "hands the Verifier those sources and nothing else — a model that "
-            "cannot search cannot invent a citation. One agent gets Parallel's "
-            "MCP server, to search and read for itself."
+            "Evidence comes from Parallel, two ways. The pipeline searches and "
+            "hands the Verifier those sources — a model that cannot search "
+            "cannot invent a citation. One agent gets Parallel's MCP server, "
+            "to search for itself."
         ),
     },
     {
@@ -118,7 +118,7 @@ BEATS: list[dict] = [
         "id": "contested",
         "hold": 10,
         "text": (
-            "This is the one that matters. The agent found real precedent — a drama "
+            "The agent found real precedent — a drama "
             "that drew three hundred thousand petition signatures and lost its "
             "sponsors. But credible sources disagree. So the system refuses to rule. "
             "It states both positions and routes it to a named human. An agent that "
@@ -131,8 +131,7 @@ BEATS: list[dict] = [
         "text": (
             "Three answers, not two. Fix it, and the scene is rewritten then checked "
             "again, so a correction cannot smuggle in a new error. Escalate. Or keep "
-            "it deliberately, with the real fact beside it. The reason is required. "
-            "The reason is the product."
+            "it deliberately, with the real fact beside it. The reason is the product."
         ),
     },
     {
@@ -147,7 +146,7 @@ BEATS: list[dict] = [
         "id": "eval",
         "hold": 9,
         "text": (
-            "Fifteen claims with known answers, run as an eval. It told us what we "
+            "Fifteen claims with known answers. It told us what we "
             "did not want to hear: the better search setting scores higher, and "
             "ruled on a live historical dispute. The one thing this must never do. "
             "We ship the setting with zero wrong calls."
@@ -158,7 +157,7 @@ BEATS: list[dict] = [
         "hold": 7,
         "text": (
             "One frame of the scene as signed off. Look at what she is holding — the "
-            "anachronism the writer chose to keep. The picture shows the decision."
+            "anachronism the writer chose to keep."
         ),
     },
     {
@@ -166,8 +165,8 @@ BEATS: list[dict] = [
         "hold": 5,
         "text": (
             "Routing to a human is not a prompt — it is a pure function, unit "
-            "tested. Sceneroom does not promise your scene is correct. It promises "
-            "no claim shipped unreviewed."
+            "tested. Sceneroom does not promise your scene is correct, only that no "
+            "claim shipped unreviewed."
         ),
     },
 ]

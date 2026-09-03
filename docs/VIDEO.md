@@ -8,7 +8,8 @@ should.* Everything else is setup for that beat.
 
 ## Before recording
 
-- [ ] Set `PARALLEL_PROCESSOR=pro` (already set in production).
+- [ ] Confirm `PARALLEL_PROCESSOR=base` (what production runs — `pro` scores
+      higher and rules on contested history, which the film says we never do).
 - [ ] Do a throwaway run first — Cloud Run cold start adds 5–15s to the first
       hit and you do not want that in take one.
 - [ ] Browser at 1500×950, **Night** theme, zoom 100%.

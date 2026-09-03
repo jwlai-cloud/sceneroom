@@ -48,7 +48,7 @@ from typing import Any
 from google.adk import Workflow
 from google.adk.workflow import START, node
 
-from app.models import Claim, ClaimKind, Scene
+from app.models import Claim, ClaimKind, Scene, Verdict
 
 logger = logging.getLogger(__name__)
 
@@ -120,6 +120,9 @@ def build_check_workflow(
                         await ctx.run_node(
                             _checker_node(name, claim, checkers[name], scene),
                             node_input=claim.id,
+                            # Concurrent children: isolate their events from the
+                            # parent branch rather than interleaving them.
+                            use_sub_branch=True,
                         )
                     done += 1
                     note(name, f"checked {done} of {len(claims)}")
@@ -160,7 +163,15 @@ def _checker_node(
     """
 
     async def check(node_input: Any) -> str:
-        await checker(claim, scene)
+        try:
+            await checker(claim, scene)
+        except Exception:
+            # One claim's check failing must not take the scene down, and must
+            # never leave a verdict of None — `route()` reads that as "sources
+            # support this", which would ship an unchecked claim as clean.
+            logger.exception("check failed for claim %s (%s)", claim.id, name)
+            claim.verdict = Verdict.UNVERIFIABLE
+            claim.reasoning = "This check did not complete. Nothing was established either way."
         return claim.verdict.value if claim.verdict else "unchecked"
 
     check.__name__ = f"{name}_{claim.id.replace('-', '_')}"

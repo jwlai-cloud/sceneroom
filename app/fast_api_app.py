@@ -145,7 +145,11 @@ def health() -> dict:
 async def create_scene(req: DraftRequest) -> Scene:
     """Draft a scene, then extract and check every claim in it."""
     scene = await orchestrator.draft_scene(
-        intent=req.intent, project=req.project, mode=req.mode, setting=req.setting
+        intent=req.intent,
+        project=req.project,
+        mode=req.mode,
+        setting=req.setting,
+        bible=req.bible,
     )
     if not scene.text:
         raise HTTPException(502, "Scene drafting failed — check model credentials.")

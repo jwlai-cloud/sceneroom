@@ -64,3 +64,17 @@ def test_every_route_gives_a_reason() -> None:
     for verdict in Verdict:
         for mode in (Mode.FICTION, Mode.DOCUMENTARY):
             assert route(claim(verdict), mode)[1].strip()
+
+
+def test_unestablished_rights_reach_a_person_in_every_mode() -> None:
+    # A rights check that finds nothing writes "refer to the clearance desk".
+    # Before this, fiction mode routed it to nobody, so the exposure shipped
+    # with no decision attached to it.
+    rights = Claim(
+        id="cl-r", kind=ClaimKind.RIGHTS, text="a 1963 song plays over the scene",
+        verdict=Verdict.UNVERIFIABLE, disposition=Disposition.PENDING,
+    )
+    for mode in (Mode.FICTION, Mode.DOCUMENTARY):
+        needs_human, reason = route(rights, mode)
+        assert needs_human, f"unestablished rights must escalate in {mode}"
+        assert "clearance" in reason.lower()

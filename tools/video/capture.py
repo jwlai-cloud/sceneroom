@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import pathlib
 import sys
 import time
@@ -45,7 +46,10 @@ OUT = HERE / "capture"
 AUDIO = HERE / "audio"
 
 PROD = "https://sceneroom-320877670799.us-central1.run.app"
-ACCESS_CODE = "jongno-1963-50f10b"
+# Published in docs/SUBMISSION.md so judges can open the room — a spend gate,
+# not a secret. Still read from the environment so rotating it does not mean
+# editing a script.
+ACCESS_CODE = os.getenv("SCENEROOM_ACCESS_CODE", "jongno-1963-50f10b")
 
 W, H = 1440, 900
 

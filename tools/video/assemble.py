@@ -102,7 +102,7 @@ def main() -> int:
                 # 12 seconds of picture to show — but the picture is a still, so
                 # freezing it shows exactly what was on screen, for as long as
                 # the narration needs.
-                keep = min(TAIL_KEEP, vid_len)
+                keep = min(TAIL_KEEP, vid_len, want)
                 seg_raw = work / f"{beat['id']}-raw.mp4"
                 run([
                     "ffmpeg", "-y", "-v", "error",

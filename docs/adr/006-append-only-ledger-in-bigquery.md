@@ -30,8 +30,10 @@ work and tests.
 - The scene is stored whole as JSON rather than shredded into columns. The model
   still moves, and a migration that loses provenance is worse than a column we
   cannot `GROUP BY`.
-- A failed audit write logs and continues. The writer's decision is never lost
-  because the warehouse was unreachable.
+- A failed audit write logs and continues, so an unreachable warehouse cannot
+  block a writer from deciding. The row is then missing from the ledger — that
+  is a known gap, not a guarantee. The scene keeps the decision; the provenance
+  record is what degrades.
 - Least privilege held: the runtime account has `WRITER` on the one dataset and
   `jobUser` at project level, so it cannot create datasets — `_ensure_dataset`
   tolerates being refused rather than demanding project-wide rights for a call
