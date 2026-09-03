@@ -41,8 +41,8 @@ BEATS: list[dict] = [
         "text": (
             "Fact-checking is a commodity. Any model with search does a version "
             "of it. What nobody ships is the record — what was checked, against "
-            "which source, decided by whom, and why. Sceneroom writes the scene, "
-            "then makes it prove itself."
+            "which source, and decided by whom. Sceneroom writes the scene, then "
+            "makes it prove itself."
         ),
     },
     {
@@ -93,9 +93,10 @@ BEATS: list[dict] = [
         "id": "continuity",
         "hold": 6,
         "text": (
-            "Continuity checks what the web cannot. Our bible says Detective Park "
-            "carries a revolver, never an automatic. The draft gave her an "
-            "automatic. Caught, against our own canon."
+            "Continuity checks what the web cannot: the scene against our own "
+            "bible. Episode three established that Park does not smoke. The "
+            "draft gave her a cigarette. No source on earth could have caught "
+            "that."
         ),
     },
     {
@@ -118,11 +119,11 @@ BEATS: list[dict] = [
         "id": "contested",
         "hold": 10,
         "text": (
-            "The agent found real precedent — a drama "
-            "that drew three hundred thousand petition signatures and lost its "
-            "sponsors. But credible sources disagree. So the system refuses to rule. "
-            "It states both positions and routes it to a named human. An agent that "
-            "knows the limit of its own authority beats one claiming omniscience."
+            "Here is the one that matters. The informant says the song came out "
+            "of Jeongseon. The sources disagree — the origin of Arirang is "
+            "genuinely unsettled. So the system refuses to rule. It states both "
+            "positions and routes it to a named human. An agent that knows the "
+            "limit of its own authority beats one claiming omniscience."
         ),
     },
     {

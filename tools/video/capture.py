@@ -55,8 +55,23 @@ W, H = 1440, 900
 
 BRIEF = (
     "Detective Park corners the informant she has been chasing since episode "
-    "three, and has to decide whether to draw her weapon"
+    "three, and has to decide whether to draw her weapon. The informant stalls, "
+    "talking about the Arirang recording drifting down from a window above them, "
+    "insisting the song came out of Jeongseon. Park lights a cigarette while "
+    "she waits him out"
 )
+# The Arirang line is deliberate. The film's centre beat is the system refusing
+# to rule on a dispute, and that beat cannot be left to whether extraction
+# happens to surface a disputed claim — an earlier take narrated a refusal over
+# four grey "nothing found either way" cards. The origin of Arirang is
+# genuinely unsettled (measured: two of three phrasings return `contested`,
+# while "Arirang is a Korean folk song" stays `verified`, so this is a real
+# dispute and not a prompt that over-flags).
+#
+# The cigarette is the same trick for the Continuity beat: the bible says
+# episode three established that Park does not smoke, so a draft in which she
+# smokes is a guaranteed canon conflict — the one kind of error no web source
+# could ever catch, which is the point the beat makes.
 SETTING = "Seoul, 1963"
 BIBLE = (
     "DETECTIVE PARK SUN-HEE carries a service revolver, never an automatic. "
