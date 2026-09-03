@@ -33,6 +33,7 @@ import logging
 import uuid
 
 from app.agents.adjudicator import build_adjudicator, route
+from app.agents.check_graph import build_check_workflow
 from app.agents.continuity import build_continuity
 from app.agents.extractor import build_extractor
 from app.agents.revise_workflow import build_revise_workflow
@@ -426,60 +427,34 @@ async def check_claims(scene: Scene, tracker: RunTracker | None = None) -> Scene
     if not scene.claims:
         scene.claims = await extract_claims(scene, tracker)
 
-    await _check_continuity(scene, tracker)
-
-    sem = asyncio.Semaphore(_MAX_CONCURRENT_CHECKS)
-    groups: dict[str, list[Claim]] = {
-        "verifier": [
-            c
-            for c in scene.claims
-            if c.kind not in (ClaimKind.FANDOM, ClaimKind.RIGHTS, ClaimKind.CANON)
-        ],
-        "fandom": [c for c in scene.claims if c.kind == ClaimKind.FANDOM],
-        "rights": [c for c in scene.claims if c.kind == ClaimKind.RIGHTS],
-    }
-    # The Fandom agent gets Parallel's MCP tools when they are available and
-    # falls back to orchestrator-retrieved sources when they are not. The
-    # Verifier never gets them: it must not choose the evidence it is judged on.
+    # The check phase runs as an ADK graph: continuity, then a runtime-sized
+    # fan-out of one child node per claim, then adjudication. The width is a
+    # property of the scene and is not known until the Extractor has run, which
+    # is what dynamic nodes exist for.
     mcp_toolset = parallel_mcp.build_search_toolset()
 
-    async def fandom_check(claim: Claim, scene: Scene) -> None:
+    async def fandom_check(claim: Claim, sc: Scene) -> None:
+        # The Fandom agent gets Parallel's MCP tools when available; the
+        # Verifier never does — it must not choose the evidence it is judged on.
         if mcp_toolset is not None:
-            await _check_fandom_via_mcp(claim, scene, mcp_toolset)
+            await _check_fandom_via_mcp(claim, sc, mcp_toolset)
         else:
-            await _check_fandom(claim, scene)
+            await _check_fandom(claim, sc)
 
-    checkers = {
-        "verifier": _check_factual,
-        "fandom": fandom_check,
-        "rights": _check_rights,
-    }
+    workflow = build_check_workflow(
+        scene=scene,
+        checkers={
+            "verifier": _check_factual,
+            "fandom": fandom_check,
+            "rights": _check_rights,
+        },
+        continuity=lambda: _check_continuity(scene, tracker),
+        adjudicate=lambda: _adjudicate(scene, tracker),
+        step=lambda name: _step(tracker, name),
+        note=lambda name, detail: tracker.note(name, detail) if tracker else None,
+    )
+    await run_agent_state(workflow, scene.id)
 
-    async def run_group(name: str) -> None:
-        claims = groups[name]
-        async with _step(tracker, name) as step:
-            if not claims:
-                _skip(step, "nothing of this kind in the scene")
-                return
-            done = 0
-
-            async def one(claim: Claim) -> None:
-                nonlocal done
-                async with sem:
-                    await checkers[name](claim, scene)
-                done += 1
-                if tracker is not None:
-                    tracker.note(name, f"checked {done} of {len(claims)}")
-
-            await asyncio.gather(*(one(c) for c in claims))
-            flagged = sum(1 for c in claims if c.needs_attention)
-            _detail(
-                step,
-                f"{len(claims)} checked, {flagged} flagged" if flagged else f"{len(claims)} checked, all clear",
-            )
-
-    await asyncio.gather(*(run_group(name) for name in groups))
-    await _adjudicate(scene, tracker)
 
     get_ledger().save_scene(scene)
     return scene
