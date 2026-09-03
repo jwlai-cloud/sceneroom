@@ -81,7 +81,7 @@ def synth(text: str, voice: str, tok: str) -> bytes:
             "Content-Type": "application/json",
         },
     )
-    with urllib.request.urlopen(req) as r:
+    with urllib.request.urlopen(req, timeout=120) as r:
         return base64.b64decode(json.load(r)["audioContent"])
 
 

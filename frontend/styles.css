@@ -478,7 +478,10 @@ textarea::placeholder, input::placeholder { color: var(--text-faint); }
   .watermark { display: none; }
   .ledger { grid-template-columns: 1fr; }
   .ledger-target { text-align: left; }
-  .themes { display: none; }
+  /* Not hidden: one of these is the high-contrast theme, and a narrow
+     viewport is exactly where someone may need it. Shrink, do not remove. */
+  .themes { font-size: 11px; }
+  .themes button { padding: 4px 7px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import hmac
 import json
 import logging
@@ -24,7 +25,7 @@ import os
 import pathlib
 from collections.abc import AsyncIterator, Awaitable, Callable
 
-from fastapi import Depends, FastAPI, HTTPException, Request, Response
+from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import FileResponse, PlainTextResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -88,12 +89,23 @@ class AccessRequest(BaseModel):
     code: str = Field(min_length=1, max_length=200)
 
 
+def _code_matches(presented: str) -> bool:
+    """Constant-time comparison that survives a non-ASCII cookie.
+
+    Starlette hands cookie values through unchanged, and `compare_digest`
+    raises TypeError on a str containing non-ASCII rather than returning
+    False — turning a wrong code into a 500 instead of a 401. Compare bytes.
+    """
+    return hmac.compare_digest(
+        presented.encode("utf-8", "replace"), ACCESS_CODE.encode("utf-8", "replace")
+    )
+
+
 def require_access(request: Request) -> None:
     """Reject a request that has not presented the access code."""
     if not ACCESS_CODE:
         return
-    presented = request.cookies.get(ACCESS_COOKIE, "")
-    if not hmac.compare_digest(presented, ACCESS_CODE):
+    if not _code_matches(request.cookies.get(ACCESS_COOKIE, "")):
         raise HTTPException(401, "This demo needs an access code.")
 
 
@@ -102,7 +114,7 @@ def access_state(request: Request) -> dict:
     """Whether a code is needed, and whether this browser already has it."""
     if not ACCESS_CODE:
         return {"required": False, "unlocked": True}
-    unlocked = hmac.compare_digest(request.cookies.get(ACCESS_COOKIE, ""), ACCESS_CODE)
+    unlocked = _code_matches(request.cookies.get(ACCESS_COOKIE, ""))
     return {"required": True, "unlocked": unlocked}
 
 
@@ -110,7 +122,7 @@ def access_state(request: Request) -> dict:
 def unlock(req: AccessRequest, response: Response) -> dict:
     if not ACCESS_CODE:
         return {"unlocked": True}
-    if not hmac.compare_digest(req.code.strip(), ACCESS_CODE):
+    if not _code_matches(req.code.strip()):
         # Deliberately no detail about why. Same message, every failure.
         raise HTTPException(401, "That code was not recognised.")
     response.set_cookie(
@@ -323,8 +335,15 @@ async def _stream(make_work: Callable[[RunTracker], Awaitable[Scene]]) -> Stream
             yield _sse("scene", scene)
         except Exception as exc:
             logger.exception("Streamed run failed")
-            task.cancel()
             yield _sse("error", {"message": str(exc) or type(exc).__name__})
+        finally:
+            # The browser closing the EventSource terminates this generator.
+            # Without this the run carries on unwatched, and every agent in it
+            # bills for a page nobody is looking at.
+            if not task.done():
+                task.cancel()
+                with contextlib.suppress(asyncio.CancelledError, Exception):
+                    await task
 
     return StreamingResponse(
         events(),
@@ -342,7 +361,11 @@ async def create_scene_stream(
     project: str = "untitled",
     setting: str = "",
     mode: Mode = Mode.FICTION,
-    bible: str = "",
+    # EventSource cannot POST, so the bible rides the query string — and Uvicorn
+    # drops a request line past ~16KB before FastAPI ever sees it, which the
+    # browser reports only as "the run stopped". Bounded here and in the
+    # textarea so an over-long bible is a clear 422 instead of a silent stall.
+    bible: str = Query("", max_length=4000),
 ) -> StreamingResponse:
     """Draft and check a scene, reporting each agent as it runs."""
 

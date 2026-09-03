@@ -231,7 +231,14 @@ class BigQueryLedger(InMemoryLedger):
         )
         if not rows:
             return None
-        scene = Scene.model_validate_json(rows[0]["payload"])
+        try:
+            scene = Scene.model_validate_json(rows[0]["payload"])
+        except Exception:  # a snapshot from an older model shape
+            # A snapshot written by an older model shape. `list_scenes` already
+            # tolerates this; without the same guard here one stale row turns
+            # every read of that scene into a 500.
+            logger.warning("scene %s has a payload this model cannot read", scene_id)
+            return None
         super().save_scene(scene)  # warm the cache; do not re-write to BigQuery
         return scene
 

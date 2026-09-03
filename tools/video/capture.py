@@ -46,10 +46,15 @@ OUT = HERE / "capture"
 AUDIO = HERE / "audio"
 
 PROD = "https://sceneroom-320877670799.us-central1.run.app"
-# Published in docs/SUBMISSION.md so judges can open the room — a spend gate,
-# not a secret. Still read from the environment so rotating it does not mean
-# editing a script.
-ACCESS_CODE = os.getenv("SCENEROOM_ACCESS_CODE", "jongno-1963-50f10b")
+# The room is gated because each run bills Gemini and Parallel. The code is
+# published in docs/SUBMISSION.md for judges, but it does not belong in source:
+# rotating it should not mean editing a script.
+ACCESS_CODE = os.environ.get("SCENEROOM_ACCESS_CODE", "")
+if not ACCESS_CODE:
+    raise SystemExit(
+        "SCENEROOM_ACCESS_CODE is not set. The deployed room is gated because "
+        "every run spends real money; export the code before capturing."
+    )
 
 W, H = 1440, 900
 
