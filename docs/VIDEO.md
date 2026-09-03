@@ -8,8 +8,11 @@ should.* Everything else is setup for that beat.
 
 ## Before recording
 
-- [ ] Confirm `PARALLEL_PROCESSOR=base` (what production runs — `pro` scores
-      higher and rules on contested history, which the film says we never do).
+- [ ] Confirm `PARALLEL_PROCESSOR=pro` (what production runs: 13/15, zero wrong).
+- [ ] **Check the take before you keep it.** The film's centre beat says the
+      system refused to rule, so the run has to contain a `contested` claim and a
+      continuity conflict. Extraction varies between runs — an earlier cut
+      narrated a refusal over four grey "nothing found either way" cards.
 - [ ] Do a throwaway run first — Cloud Run cold start adds 5–15s to the first
       hit and you do not want that in take one.
 - [ ] Browser at 1500×950, **Night** theme, zoom 100%.

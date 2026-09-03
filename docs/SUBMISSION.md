@@ -180,8 +180,9 @@ Fifteen claims with known answers, two of them genuinely disputed. The two error
 types are scored separately, because they are not equally bad — a *miss* costs
 the writer a decision, a *wrong call* ships an error.
 
-    base   9/15 correct · 6 missed · 0 wrong    <- shipped
+    base   9/15 correct · 6 missed · 0 wrong
     pro   11/15 correct · 3 missed · 1 WRONG    <- ruled on a live dispute
+    pro   13/15 correct · 2 missed · 0 wrong    <- shipped, after the fix below
 
 We had been telling ourselves the better search setting was simply better. It
 scored higher **and** ruled on whether Sejong invented Hangul unaided — which
@@ -189,10 +190,25 @@ specialists genuinely dispute, and which is the one thing this product must
 never do.
 
 We fixed that once with an instruction, and it held. Then we re-ran the eval the
-day before submitting, and the wrong call was back: the open web had moved under
+day before submitting and the wrong call was back — the open web had moved under
 us, and the same setting was again ruling on a live dispute. The eval is the only
-reason we knew. Production now runs the setting that makes **zero wrong calls**,
-and pays for it with six claims that come back unverifiable.
+reason we knew.
+
+The first response was to drop to the weaker search setting, which does make zero
+wrong calls. It also answered "nothing found either way" to five of six claims in
+a live run, which is not verification — it is a shrug with citations.
+
+So we fixed the actual reasoning instead. The claim was *"Sejong personally
+invented Hangul **without help from scholars**"*, and the model was treating
+sources about the Hall of Worthies as contradicting it. But the absolute is the
+disputed part: sources describing other contributors are one side of that
+argument, not a refutation of a date or a place. The Verifier is now told to read
+absolutes about origination — "alone", "personally", "unaided", "first" — as the
+axis under dispute, and to reserve `contradicted` for claims whose factual core
+fails.
+
+**13/15, zero wrong** — the best this eval has recorded, with both disputed cases
+correctly refused.
 
 That is the trade this product exists to make. A miss costs the writer a
 decision. A wrong call ships an error under our name.

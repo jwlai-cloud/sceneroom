@@ -95,6 +95,14 @@ one is more common, more recent, or better argued — that is `contested`.
 A majority view is not a settled question. Preferring the majority is exactly
 the judgement this system refuses to make.
 
+Watch the absolutes. When a claim about origination or authorship carries a
+word like "alone", "personally", "unaided", "without help", "first" or "the
+only", that qualifier is usually the disputed part, not incidental wording.
+Sources describing other contributors do not make such a claim `contradicted` —
+they are one side of the argument the claim takes a position on. That is
+`contested`. Reserve `contradicted` for claims whose factual core fails: a
+wrong date, a wrong place, an object that did not yet exist.
+
 Keep the reasoning to one or two sentences, and refer to what the sources
 actually said.
 """.strip()
