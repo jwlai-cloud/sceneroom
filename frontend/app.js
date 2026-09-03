@@ -263,8 +263,13 @@ function longText(label, text, italic) {
 // from search results, so they are not ours to trust.
 const safeUrl = (u) => {
   try {
-    const parsed = new URL(String(u ?? ""), window.location.origin);
-    return ["http:", "https:"].includes(parsed.protocol) ? parsed.href : "";
+    // No base URL: a relative value must fail to parse rather than resolve
+    // against our own origin. Otherwise a "source" of /api/stream/scene?... is
+    // rendered as a link that starts an authenticated, billable run on click.
+    const parsed = new URL(String(u ?? ""));
+    if (!["http:", "https:"].includes(parsed.protocol)) return "";
+    if (parsed.origin === window.location.origin) return "";
+    return parsed.href;
   } catch {
     return "";
   }

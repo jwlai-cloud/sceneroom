@@ -25,10 +25,12 @@ pulled from the demo at the payoff frame.
 
 ## Inspiration
 
-In June 2026, MBC's *21st Century Grand Princess* drew sustained criticism for
-verification errors and historical distortion. The production team and cast
-issued public apologies, and the argument carried on online well after the
-apology. Those are post-air costs for a pre-air failure.
+In May 2026, MBC's *21st Century Grand Princess* drew sustained criticism for
+verification errors and historical distortion. The writer, the lead actors and
+the directors issued public apologies, and the production muted the audio on one
+of the disputed scenes *after it had already aired*
+([source](https://sports.khan.co.kr/en/article/202605192014007)). Those are
+post-air costs for a pre-air failure.
 
 The interesting part is who caught it: **viewers**. Fans are the industry's de
 facto continuity QA — they maintain the wikis, track the props, and litigate the

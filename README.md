@@ -95,8 +95,13 @@ uv run python evals/run_eval.py --compare   # base vs pro
 gcloud run deploy sceneroom --source . \
   --min-instances 0 --max-instances 3 --timeout 600 --cpu-boost \
   --service-account sceneroom-run@PROJECT.iam.gserviceaccount.com \
-  --set-secrets PARALLEL_API_KEY=parallel-api-key:latest
+  --set-secrets PARALLEL_API_KEY=parallel-api-key:latest,SCENEROOM_ACCESS_CODE=sceneroom-access-code:latest
 ```
+
+`SCENEROOM_ACCESS_CODE` is not optional on a public URL. Unset, the endpoints
+that call Gemini and Parallel are open to anyone who finds the hostname, and
+`--max-instances 3` is the only thing between that and a bill. Either set it, or
+deploy with `--no-allow-unauthenticated` and reach the service through IAM.
 
 `min-instances 0` idles at ~$0. Full walkthrough, including the least-privilege
 service account and the BigQuery dataset ACL, is in

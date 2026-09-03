@@ -30,9 +30,10 @@ BEATS: list[dict] = [
         "id": "problem",
         "hold": 5,
         "text": (
-            "In June, a Korean drama apologised on air after viewers caught "
-            "historical errors the production missed. The apology did not end "
-            "it. And nobody could tell which deviations were deliberate."
+            "In May, a Korean drama apologised for a historical verification "
+            "controversy, and muted the audio on a scene already broadcast. "
+            "Viewers had caught what the production missed. But nobody could "
+            "tell which deviations were deliberate."
         ),
     },
     {

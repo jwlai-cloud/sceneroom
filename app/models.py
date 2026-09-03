@@ -108,9 +108,13 @@ class Claim(BaseModel):
 
     @property
     def needs_attention(self) -> bool:
-        return (
-            self.verdict in (Verdict.CONTRADICTED, Verdict.CONTESTED)
-            and self.disposition == Disposition.PENDING
+        # `needs_human` is what the Adjudicator decided, and it escalates things
+        # this list would otherwise miss — an unestablished rights position is
+        # UNVERIFIABLE and still has to reach clearance. Without it, such a
+        # claim stayed out of `open_flags`, so the scene read as signed off and
+        # the frame endpoint would render it.
+        return self.disposition == Disposition.PENDING and (
+            self.needs_human or self.verdict in (Verdict.CONTRADICTED, Verdict.CONTESTED)
         )
 
 

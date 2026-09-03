@@ -353,6 +353,15 @@ async def _check_continuity(scene: Scene, tracker: RunTracker | None) -> None:
             + "\n".join(f"- {c.text}" for c in canon)
         )
         out = await run_agent(build_continuity(), prompt)
+        if not out:
+            # run_agent returns {} when the call or the parse failed. Treating
+            # that as "no conflicts" marks every canon claim consistent with a
+            # bible nothing actually read.
+            for claim in canon:
+                claim.verdict = Verdict.UNVERIFIABLE
+                claim.reasoning = "The continuity check did not complete. Canon was not verified."
+            _detail(step, f"continuity check failed; {len(canon)} canon claims not cleared")
+            return
         conflicts = out.get("conflicts") or []
         unmatched: list[str] = []
 

@@ -67,10 +67,10 @@ SHELL = """
 
 PROBLEM = SHELL + """
 <div class="wrap">
-  <span class="eyebrow">Seoul · June 2026</span>
-  <h1>A drama apologised on air.<br>The argument outlived the apology.</h1>
+  <span class="eyebrow">Seoul · May 2026</span>
+  <h1>A drama apologised on air,<br>and muted a scene already broadcast.</h1>
   <div class="rule"></div>
-  <p>Viewers had caught historical errors the production missed.</p>
+  <p>Viewers had caught the historical errors the production missed.</p>
   <p style="margin-top:14px;color:#ece8e4">
     The errors were not the real problem. Nobody could tell which deviations
     were <em>deliberate</em>.</p>
