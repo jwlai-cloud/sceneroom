@@ -84,3 +84,27 @@ def test_health_and_reads_stay_open(monkeypatch: pytest.MonkeyPatch) -> None:
         if isinstance(route, APIRoute) and route.path in open_paths:
             names = {d.call.__name__ for d in route.dependant.dependencies if d.call}
             assert "require_access" not in names, f"{route.path} should stay readable"
+
+
+def test_a_key_link_admits_in_one_click() -> None:
+    """A submission form has nowhere to put an access code, so the hosted URL
+    itself has to work. `?key=` sets the cookie and redirects to a clean `/`."""
+    import app.fast_api_app as mod
+    from fastapi.testclient import TestClient
+
+    original = mod.ACCESS_CODE
+    mod.ACCESS_CODE = "open-sesame"
+    try:
+        client = TestClient(mod.app, follow_redirects=False)
+
+        ok = client.get("/?key=open-sesame")
+        assert ok.status_code == 303
+        assert ok.headers["location"] == "/"
+        assert mod.ACCESS_COOKIE in ok.cookies
+
+        # A wrong key is not an error; it falls through to the gate.
+        bad = client.get("/?key=nope")
+        assert bad.status_code == 200
+        assert mod.ACCESS_COOKIE not in bad.cookies
+    finally:
+        mod.ACCESS_CODE = original
