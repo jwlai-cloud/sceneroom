@@ -4,7 +4,7 @@ _Deadline **2026-09-07 14:00 PT**. Judging **2026-09-23 → 10-07**, so the URL
 must survive into October._
 
 **Live:** <https://sceneroom-320877670799.us-central1.run.app> · access code is
-on the submission page · revision `sceneroom-00024-qjc`
+on the submission page · revision `sceneroom-00025-gm8`
 
 ## Done
 
@@ -21,7 +21,7 @@ on the submission page · revision `sceneroom-00024-qjc`
 | Secret Manager + least privilege | no key material in the container; dataset-scoped WRITER |
 | Access gate | cookie-based, guards the five endpoints that spend money |
 | One payoff frame | `gemini-3.1-flash-image`, only once nothing is open |
-| Tests | 48 unit, ruff clean |
+| Tests | 49 unit, ruff clean |
 | Docs | `ARCHITECTURE.md`, 7 ADRs, `SUBMISSION.md`, `VIDEO.md` |
 | Devpost thumbnail | `docs/sceneroom-thumbnail.jpg`, 1200×800 |
 | Teaching artefact | `tutorial.html` — navigable page, + `TUTORIAL.md` |
@@ -107,5 +107,9 @@ standards desk could add without forking.
 8. `gcloud` CLI user credentials went stale while ADC stayed valid — every
    command failed `PERMISSION_DENIED` on a project the account owns. Workaround:
    `CLOUDSDK_AUTH_ACCESS_TOKEN=$(gcloud auth application-default print-access-token)`.
+9. Nothing sent `Cache-Control`, so browsers applied heuristic freshness and
+   could serve a stale `app.js` without revalidating. The access gate ships
+   `hidden` and is revealed by that script, so a returning visitor saw the room
+   with no way to enter the code. Now `no-cache` on the UI, with a test.
 
 Every one was found by running the thing, not by reading about it.

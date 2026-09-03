@@ -53,3 +53,17 @@ def test_no_wildcard_shadows_a_stream_route() -> None:
                 o.startswith("{") or o == s for o, s in zip(other, segments, strict=True)
             )
             assert not shadows, f"{earlier.path} is declared before {path} and shadows it"
+
+
+def test_the_ui_is_served_with_revalidation() -> None:
+    """A stale app.js hides the access gate, because the gate ships `hidden`
+    and only that script reveals it. Found in a browser, not in review."""
+    from fastapi.testclient import TestClient
+
+    from app.fast_api_app import app
+
+    client = TestClient(app)
+    for path in ("/", "/static/app.js"):
+        res = client.get(path)
+        assert res.status_code == 200, path
+        assert res.headers.get("cache-control") == "no-cache", path

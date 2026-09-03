@@ -415,12 +415,30 @@ async def decide_stream(
 
 # --- static UI --------------------------------------------------------------
 
+class RevalidatingStatic(StaticFiles):
+    """Serve the UI with `no-cache`, meaning revalidate rather than never cache.
+
+    Nothing here was sending Cache-Control at all, so browsers fell back to
+    heuristic freshness and could hold a stale app.js without asking. The gate
+    markup ships `hidden` and is revealed by that script, so a stale copy
+    presents a page with no way to enter the access code — which is exactly how
+    it was found. ETags still make the revalidation cheap.
+    """
+
+    async def get_response(self, path: str, scope):  # type: ignore[override]
+        response = await super().get_response(path, scope)
+        response.headers["Cache-Control"] = "no-cache"
+        return response
+
+
 if FRONTEND.is_dir():
-    app.mount("/static", StaticFiles(directory=str(FRONTEND)), name="static")
+    app.mount("/static", RevalidatingStatic(directory=str(FRONTEND)), name="static")
 
     @app.get("/")
     def index() -> FileResponse:
-        return FileResponse(str(FRONTEND / "index.html"))
+        return FileResponse(
+            str(FRONTEND / "index.html"), headers={"Cache-Control": "no-cache"}
+        )
 
 
 if __name__ == "__main__":
