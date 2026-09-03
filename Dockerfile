@@ -22,6 +22,11 @@ COPY ./pyproject.toml ./README.md ./uv.lock* ./
 
 COPY ./app ./app
 
+# The UI is served by fast_api_app from this directory. Without it the
+# container starts fine and serves 404 at / — a silent failure, so it is
+# guarded by tests/unit/test_packaging.py.
+COPY ./frontend ./frontend
+
 RUN uv sync --frozen
 
 ARG COMMIT_SHA=""

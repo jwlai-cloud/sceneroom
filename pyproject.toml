@@ -6,16 +6,21 @@ authors = [
     {name = "Junwei Lai", email = "junwei.lai@trafficguard.ai"},
 ]
 dependencies = [
-    "google-adk>=2.0.0,<3.0.0",
-    "opentelemetry-instrumentation-google-genai>=0.1.0,<1.0.0",
+    "google-adk[gcp,otel-gcp]>=2.5.0,<3.0.0",
     "gcsfs>=2024.11.0",
     "httpx>=0.27.0",
     "google-cloud-bigquery>=3.25.0",
     "google-cloud-logging>=3.12.0,<4.0.0",
-    "google-cloud-aiplatform[evaluation]>=1.130.0",
+    "google-cloud-aiplatform[evaluation]>=1.156.0",
     "fastapi>=0.115.8,<1.0.0",
     "uvicorn~=0.34.0",
     "asyncpg>=0.30.0,<1.0.0",
+    "mcp>=1.9.0,<2.0.0",
+    "a2a-sdk[http-server]>=1.0,<2",
+    "aiohttp>=3.13.4",
+    "opentelemetry-resourcedetector-gcp<=1.12.0a0",
+    "python-multipart>=0.0.20,<1.0.0",
+    "sqlalchemy>=2,<3",
 ]
 requires-python = ">=3.11,<3.14"
 
@@ -94,27 +99,4 @@ asyncio_default_fixture_loop_scope = "function"
 
 [tool.hatch.build.targets.wheel]
 packages = ["app"]
-
-[tool.agents-cli]
-# Generation metadata - enables CLI commands to understand project context
-# These fields allow any generated project to work as a remote template
-name = "sceneroom"
-description = "Simple ReAct agent"
-base_template = "adk"
-agent_directory = "app"
-
-# Generation context
-generated_at = "2026-08-03T09:37:46.947117+00:00"
-acli_version = "0.1.1"
-
-[tool.agents-cli.create_params]
-# Parameters used during project creation
-deployment_target = "cloud_run"
-session_type = "in_memory"
-cicd_runner = "skip"
-include_data_ingestion = false
-
-datastore = "none"
-
-agent_guidance_filename = "CLAUDE.md"
 

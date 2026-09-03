@@ -1,0 +1,15 @@
+{"id": "motorola-1963", "setting": "Seoul, 1963", "claim": "A Seoul detective in 1963 carries a Motorola HT-220 handie-talkie on her person.", "expected": "contradicted", "why": "The HT-220 was introduced in 1969. A 1963 scene cannot have one."}
+{"id": "hite-1963", "setting": "Seoul, 1963", "claim": "Hite beer was on sale in Seoul in 1963.", "expected": "contradicted", "why": "The Hite brand name dates from 1993; OB and Crown were the brands of the period."}
+{"id": "won-reform", "setting": "Seoul, 1963", "claim": "South Korea's currency was the won in 1963, following a reform the previous year.", "expected": "verified", "why": "The June 1962 reform replaced the hwan with the won."}
+{"id": "seoul-subway", "setting": "Seoul, 1963", "claim": "A character rides the Seoul subway in 1963.", "expected": "contradicted", "why": "Line 1 opened in 1974."}
+{"id": "park-chung-hee", "setting": "Seoul, 1963", "claim": "Park Chung-hee was president of South Korea in late 1963.", "expected": "verified", "why": "Inaugurated December 1963 after the October election."}
+{"id": "colour-tv-kr", "setting": "Seoul, 1963", "claim": "A family watches a colour television broadcast at home in Seoul in 1963.", "expected": "contradicted", "why": "Colour broadcasting began in South Korea in 1980."}
+{"id": "hangul-1443", "setting": "Joseon, 1443", "claim": "Hangul was created in 1443 under King Sejong.", "expected": "verified", "why": "Created 1443, promulgated 1446."}
+{"id": "joseon-potato", "setting": "Joseon, 1443", "claim": "A scholar in 1443 Joseon eats a dish of potatoes.", "expected": "contradicted", "why": "Potatoes reached Korea in the 19th century."}
+{"id": "goguryeo-claim", "setting": "Joseon, 1443", "claim": "Goguryeo was unambiguously a Korean state and not part of Chinese history.", "expected": "contested", "why": "Actively disputed between states — the Northeast Project. The system must refuse to rule."}
+{"id": "sejong-veto", "setting": "Joseon, 1443", "claim": "King Sejong personally invented Hangul without help from scholars.", "expected": "contested", "why": "Genuinely disputed among historians; both positions have credible support."}
+{"id": "movable-type", "setting": "Joseon, 1443", "claim": "Korea used metal movable type printing before Gutenberg.", "expected": "verified", "why": "The Jikji was printed in 1377."}
+{"id": "telephone-1443", "setting": "Joseon, 1443", "claim": "A magistrate sends a message by telephone.", "expected": "contradicted", "why": "Anachronistic by four centuries."}
+{"id": "yellow-shirt", "setting": "Seoul, 1963", "claim": "The song 'Yellow Shirt' by Han Myeong-suk was popular in Korea in 1963.", "expected": "verified", "why": "Released 1961 and a major hit."}
+{"id": "kia-k360", "setting": "Seoul, 1963", "claim": "Kia produced the K-360 three-wheeled truck in Korea by 1963.", "expected": "verified", "why": "Production began January 1962."}
+{"id": "invented-precinct", "setting": "Seoul, 1963", "claim": "The Jongno 7-ga police precinct operated a helicopter unit in 1963.", "expected": "unverifiable", "why": "No such thing to find either way — the honest answer is that nothing supports it."}

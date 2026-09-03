@@ -1,70 +1,169 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sceneroom</title>
-  <link rel="stylesheet" href="/static/styles.css" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sceneroom — write the scene, then hold it to account</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-  <header>
-    <span class="mark">Sceneroom</span>
-    <span class="slug" id="slug">no scene yet</span>
-    <span class="live" id="live" title="Whether verification is hitting the live Parallel API">
-      <span class="dot"></span><span id="liveLabel">checking…</span>
-    </span>
-  </header>
 
-  <div class="wrap">
-    <!-- The brief -->
-    <aside class="brief">
-      <h2>The brief</h2>
+<!-- Atmosphere: the room the console sits in. CSS-only, so it ships in the
+     container with no asset to fetch. The Imagen payoff frame drops in here
+     later as a plate behind the same overlay. -->
+<div class="atmosphere" aria-hidden="true"></div>
 
-      <label for="intent">What happens in this scene</label>
-      <textarea id="intent" placeholder="A detective loses her badge in a rain-soaked alley…"></textarea>
+<!-- The setting, set enormous and nearly invisible behind the page. It is the
+     one piece of display type in the room, and it says where you are. -->
+<div class="watermark" id="watermark" aria-hidden="true"></div>
 
-      <label for="setting">Period and place</label>
-      <input type="text" id="setting" placeholder="Seoul, 1963" />
+<!-- Drawn between a flagged span and its margin note when either is selected. -->
+<svg class="bridge" id="bridge" aria-hidden="true"><path/></svg>
 
-      <label for="mode">Production type</label>
-      <select id="mode">
-        <option value="fiction">Fiction — deviation is a choice</option>
-        <option value="documentary">Documentary — deviation is an error</option>
-      </select>
-
-      <button class="go" id="go">Write the scene</button>
-
-      <div class="hint">
-        <b>Try one:</b>
-        <button class="example" data-intent="A detective confronts an informant in a rain-soaked alley and loses her badge in the struggle. She radios for backup." data-setting="Seoul, 1963">Seoul, 1963 — a detective loses her badge</button>
-        <button class="example" id="demoBtn">Or load the sample scene (no API key needed)</button>
-        <button class="example" data-intent="A court scholar quietly warns a young official that the history he is copying has been altered to please the throne." data-setting="Joseon Korea, 1443">Joseon, 1443 — a scholar spots an altered record</button>
-      </div>
-    </aside>
-
-    <!-- The page + margin -->
-    <main class="stage">
-      <div class="status" id="status"><span id="statusText">Give the crew a brief to start.</span><span class="bar"></span></div>
-      <div id="err"></div>
-
-      <div class="pagewrap">
-        <article class="page" id="page">
-          <div class="sluglinerow"><span>Untitled scene</span><span class="rev">—</span></div>
-          <span style="color:var(--graphite)">The scene will appear here, with anything checkable underlined.</span>
-        </article>
-
-        <div class="margin" id="margin">
-          <div class="empty">Notes from the crew appear here, in the margin — one per flagged span, with its sources and what you decided.</div>
-        </div>
-      </div>
-
-      <section class="prov" id="provWrap" hidden>
-        <h2>Provenance</h2>
-        <ol id="prov"></ol>
-      </section>
-    </main>
+<header class="bar">
+  <div class="bar-left">
+    <span class="wordmark">SCENEROOM</span>
+    <span class="crumb" id="crumb">no scene yet</span>
   </div>
+  <div class="bar-right">
+    <div class="themes" role="group" aria-label="Room lighting">
+      <button class="theme-btn" data-theme="night"    aria-pressed="true">Night</button>
+      <button class="theme-btn" data-theme="daylight" aria-pressed="false">Daylight</button>
+      <button class="theme-btn" data-theme="contrast" aria-pressed="false">Contrast</button>
+    </div>
+    <span class="pill" id="parallelPill" title="Whether checks hit the live web">
+      <i class="dot"></i><span id="parallelText">checking…</span>
+    </span>
+    <button class="btn ghost" id="demoBtn">Load sample scene</button>
+    <button class="btn primary" id="go">Run the crew</button>
+  </div>
+</header>
 
-  <script src="/static/app.js"></script>
+<main class="room">
+
+  <!-- Left rail: the brief, then the crew working on it -->
+  <aside class="rail" aria-label="Brief and crew">
+    <section class="panel">
+      <h2 class="eyebrow">The brief</h2>
+      <label class="field">
+        <span>What happens in this scene</span>
+        <textarea id="intent" rows="3" placeholder="A detective loses her badge in a rain-soaked alley…"></textarea>
+      </label>
+      <label class="field">
+        <span>Period and place</span>
+        <input id="setting" placeholder="Seoul, 1963">
+      </label>
+      <label class="field">
+        <span>Production type</span>
+        <select id="mode">
+          <option value="fiction">Fiction — a deviation is a choice</option>
+          <option value="documentary">Documentary — a deviation is an error</option>
+        </select>
+      </label>
+      <details class="field bible">
+        <summary>Production bible <span class="hint">optional — Continuity checks canon against it</span></summary>
+        <textarea id="bible" rows="4" maxlength="4000" placeholder="DET. SEO HANA carries a service revolver, never an automatic.&#10;Episode 3 established the Jongno precinct has no radio room."></textarea>
+      </details>
+      <div class="examples">
+        <span class="eyebrow">Try one</span>
+        <button class="example" data-intent="A detective loses her badge in a rain-soaked alley" data-setting="Seoul, 1963">Seoul, 1963 — a detective loses her badge</button>
+        <button class="example" data-intent="A scholar notices a court record has been altered, and must decide whether to say so" data-setting="Joseon, 1443">Joseon, 1443 — a scholar spots an altered record</button>
+        <button class="example"
+          data-intent="Detective Park corners the informant she has been chasing since episode three, and has to decide whether to draw her weapon"
+          data-setting="Seoul, 1963"
+          data-bible="DETECTIVE PARK SUN-HEE carries a service revolver, never an automatic. She was issued badge 1887 in 1961 and has never lost it.&#10;The Jongno precinct has no radio room; all dispatch runs through the Euljiro switchboard.&#10;Episode 3 established that Park does not smoke.">Seoul, 1963 — with a production bible (wakes Continuity)</button>
+      </div>
+    </section>
+
+    <section class="panel recent-panel">
+      <h2 class="eyebrow">Recent scenes <span class="hint" id="recentCount"></span></h2>
+      <ol class="recent" id="recent"></ol>
+      <p class="hint" id="recentEmpty">Scenes you run are kept in the ledger and listed here.</p>
+    </section>
+
+    <section class="panel crew-panel">
+      <h2 class="eyebrow">Crew <span id="runLabel" class="run-label"></span>
+        <span id="runSummary" class="run-summary"></span></h2>
+      <p class="crew-intro">
+        The scene stays yours while the room checks it. Results arrive in the margin.
+      </p>
+      <ol class="crew" id="crew"></ol>
+      <div class="wait-card">
+        <strong id="crewHead">Before the crew runs</strong>
+        <p id="crewNote">
+          Give the crew a brief, then run it. A pass takes about half a minute —
+          that is the room working, not a dead end.
+        </p>
+      </div>
+    </section>
+  </aside>
+
+  <!-- Centre: the scene itself, flags underlined in place -->
+  <section class="stage" aria-label="Scene">
+    <div class="stage-head">
+      <span class="eyebrow" id="sceneLabel">Give the crew a brief to start.</span>
+      <span class="counter" id="counter"></span>
+      <button class="btn" id="frameBtn" hidden>Render the frame</button>
+    </div>
+    <div class="frame-wrap" id="frameWrap" hidden>
+      <img id="frameImg" alt="A generated film still of the signed-off scene">
+      <p class="hint">Imagen · one frame of the scene as signed off. A payoff, not a storyboard.</p>
+    </div>
+
+    <article class="page" id="page">
+      <div class="page-head"><span id="pageSlug">untitled scene</span><span id="pageRev">first draft</span></div>
+      <pre class="script" id="script">The scene will appear here, with anything checkable underlined.</pre>
+    </article>
+  </section>
+
+  <!-- Right: one note per flagged span -->
+  <aside class="margin" aria-label="Flags">
+    <h2 class="eyebrow">Flags</h2>
+    <div id="margin"></div>
+    <p class="aside" id="marginNote">
+      One card per claim. Click one — or a line in the scene — to open it and
+      see the sources behind it.
+    </p>
+  </aside>
+</main>
+
+<footer class="ledger">
+  <div class="ledger-label">
+    <span class="eyebrow">Ledger</span>
+    <span class="hint">append-only</span>
+  </div>
+  <div class="ledger-entries" id="ledger"></div>
+  <div class="ledger-actions">
+    <a class="btn" id="recordBtn" hidden download>Download the record</a>
+    <span class="ledger-target hint" id="ledgerTarget"></span>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- Shown only when the deployment sets an access code. Every run behind this
+     URL spends on Gemini and Parallel, so the gate is about cost, not secrecy. -->
+<div class="gate" id="gate" hidden>
+  <form class="gate-card" id="gateForm">
+    <span class="eyebrow">Sceneroom</span>
+    <h1>This demo needs an access code.</h1>
+    <p>
+      Each run drafts a scene with Gemini and checks it against the live web
+      through Parallel, so the room is kept behind a code. Judges: the code is
+      on the submission page.
+    </p>
+    <label class="field">
+      <span>Access code</span>
+      <input id="gateCode" autocomplete="off" autofocus>
+    </label>
+    <button class="btn primary" type="submit">Enter the room</button>
+    <p class="gate-error" id="gateError" hidden></p>
+  </form>
+</div>
+
+<script src="/static/app.js"></script>
 </body>
 </html>

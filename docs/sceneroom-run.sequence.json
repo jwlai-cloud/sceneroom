@@ -1,0 +1,339 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Sceneroom \u2014 one pass, end to end",
+    "subtitle": "A brief becomes a checked scene in about thirty seconds, streamed while it happens.",
+    "output": "sceneroom-run.html",
+    "viewBox": [
+      1080,
+      920
+    ],
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "draft",
+        "label": "Draft and extract",
+        "focus": [
+          "room",
+          "orchestrator",
+          "writer",
+          "extractor"
+        ],
+        "note": "The brief becomes a scene, then a list of claims that can be checked."
+      },
+      {
+        "id": "evidence",
+        "label": "Where evidence comes from",
+        "focus": [
+          "orchestrator",
+          "parallel",
+          "verifier",
+          "fandom"
+        ],
+        "note": "The orchestrator retrieves; the Verifier only judges what it is handed."
+      },
+      {
+        "id": "decide",
+        "label": "The human decision",
+        "focus": [
+          "orchestrator",
+          "adjudicator",
+          "room",
+          "ledger"
+        ],
+        "note": "Routing is a pure function. The writer decides, and the reason is recorded."
+      }
+    ]
+  },
+  "participants": [
+    {
+      "id": "room",
+      "type": "frontend",
+      "label": "Scene room",
+      "sublabel": "browser, EventSource"
+    },
+    {
+      "id": "orchestrator",
+      "type": "backend",
+      "label": "Orchestrator",
+      "sublabel": "the only caller"
+    },
+    {
+      "id": "writer",
+      "type": "cloud",
+      "label": "Writer",
+      "sublabel": "Gemini"
+    },
+    {
+      "id": "extractor",
+      "type": "cloud",
+      "label": "Extractor",
+      "sublabel": "Gemini"
+    },
+    {
+      "id": "parallel",
+      "type": "external",
+      "label": "Parallel",
+      "sublabel": "Search API + MCP"
+    },
+    {
+      "id": "verifier",
+      "type": "cloud",
+      "label": "Verifier",
+      "sublabel": "Gemini"
+    },
+    {
+      "id": "fandom",
+      "type": "cloud",
+      "label": "Fandom",
+      "sublabel": "Gemini + MCP tools"
+    },
+    {
+      "id": "adjudicator",
+      "type": "security",
+      "label": "Adjudicator",
+      "sublabel": "route() is code"
+    },
+    {
+      "id": "ledger",
+      "type": "database",
+      "label": "Ledger",
+      "sublabel": "BigQuery, append-only"
+    }
+  ],
+  "segments": [
+    {
+      "from": 165,
+      "to": 345,
+      "label": "Draft"
+    },
+    {
+      "from": 375,
+      "to": 645,
+      "label": "Check \u2014 concurrently, per claim"
+    },
+    {
+      "from": 665,
+      "to": 845,
+      "label": "Decide and record"
+    }
+  ],
+  "messages": [
+    {
+      "id": "brief",
+      "from": "room",
+      "to": "orchestrator",
+      "y": 185,
+      "label": "brief + bible (SSE opens)",
+      "variant": "emphasis"
+    },
+    {
+      "id": "draft",
+      "from": "orchestrator",
+      "to": "writer",
+      "y": 225,
+      "label": "intent -> scene",
+      "variant": "default"
+    },
+    {
+      "id": "scene",
+      "from": "writer",
+      "to": "orchestrator",
+      "y": 262,
+      "label": "1,300 chars",
+      "variant": "return"
+    },
+    {
+      "id": "extract",
+      "from": "orchestrator",
+      "to": "extractor",
+      "y": 300,
+      "label": "scene -> claims",
+      "variant": "default"
+    },
+    {
+      "id": "claims",
+      "from": "extractor",
+      "to": "orchestrator",
+      "y": 337,
+      "label": "7 claims, typed",
+      "variant": "return"
+    },
+    {
+      "id": "search",
+      "from": "orchestrator",
+      "to": "parallel",
+      "y": 392,
+      "label": "search per claim",
+      "variant": "security"
+    },
+    {
+      "id": "sources",
+      "from": "parallel",
+      "to": "orchestrator",
+      "y": 430,
+      "label": "ranked sources",
+      "variant": "return"
+    },
+    {
+      "id": "judge",
+      "from": "orchestrator",
+      "to": "verifier",
+      "y": 470,
+      "label": "claim + the sources, nothing else",
+      "variant": "emphasis"
+    },
+    {
+      "id": "verdict",
+      "from": "verifier",
+      "to": "orchestrator",
+      "y": 508,
+      "label": "verified | contradicted | contested",
+      "variant": "return"
+    },
+    {
+      "id": "precedent",
+      "from": "orchestrator",
+      "to": "fandom",
+      "y": 552,
+      "label": "audience precedent",
+      "variant": "default"
+    },
+    {
+      "id": "mcp",
+      "from": "fandom",
+      "to": "parallel",
+      "y": 590,
+      "label": "web_search, web_fetch (MCP)",
+      "variant": "dashed"
+    },
+    {
+      "id": "found",
+      "from": "fandom",
+      "to": "orchestrator",
+      "y": 628,
+      "label": "precedent + the pages it opened",
+      "variant": "return"
+    },
+    {
+      "id": "route",
+      "from": "orchestrator",
+      "to": "adjudicator",
+      "y": 682,
+      "label": "every verdict",
+      "variant": "security"
+    },
+    {
+      "id": "queue",
+      "from": "adjudicator",
+      "to": "orchestrator",
+      "y": 720,
+      "label": "3 of 7 need a human",
+      "variant": "return"
+    },
+    {
+      "id": "flags",
+      "from": "orchestrator",
+      "to": "room",
+      "y": 758,
+      "label": "scene + flags + citations",
+      "variant": "emphasis"
+    },
+    {
+      "id": "decision",
+      "from": "room",
+      "to": "orchestrator",
+      "y": 796,
+      "label": "fix | keep deliberate | escalate",
+      "variant": "emphasis"
+    },
+    {
+      "id": "record",
+      "from": "orchestrator",
+      "to": "ledger",
+      "y": 834,
+      "label": "verdict, decision, reason, sources",
+      "variant": "default"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "orchestrator",
+      "from": 180,
+      "to": 840,
+      "type": "backend"
+    },
+    {
+      "participant": "writer",
+      "from": 220,
+      "to": 268,
+      "type": "cloud"
+    },
+    {
+      "participant": "extractor",
+      "from": 295,
+      "to": 343,
+      "type": "cloud"
+    },
+    {
+      "participant": "parallel",
+      "from": 387,
+      "to": 436,
+      "type": "external"
+    },
+    {
+      "participant": "verifier",
+      "from": 465,
+      "to": 514,
+      "type": "cloud"
+    },
+    {
+      "participant": "fandom",
+      "from": 547,
+      "to": 634,
+      "type": "cloud"
+    },
+    {
+      "participant": "adjudicator",
+      "from": 677,
+      "to": 726,
+      "type": "security"
+    },
+    {
+      "participant": "ledger",
+      "from": 829,
+      "to": 848,
+      "type": "database"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Why the orchestrator retrieves",
+      "items": [
+        "The Verifier is handed sources and judges only those",
+        "A model that cannot search cannot invent a citation",
+        "No sources short-circuits to unverifiable before any model call"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "The one agent that searches",
+      "items": [
+        "Fandom asks what this audience has already litigated",
+        "That is iterative, so it holds Parallel's MCP tools",
+        "Trusted with what has been argued about, never with what is true"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Thirty seconds, streamed",
+      "items": [
+        "Each agent reports start, duration and finding over SSE",
+        "Claims are checked concurrently, capped at six",
+        "The wait is the evidence the system is multi-step"
+      ]
+    }
+  ]
+}

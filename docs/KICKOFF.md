@@ -8,37 +8,52 @@ cd /Users/junwei.lai/Projects/Agent/sceneroom && claude
 
 ---
 
-## Where the build actually is (2026-08-03)
+## Where the build actually is (2026-08-07)
 
-**Working, committed, and pushed.** The full loop runs locally against live
-Gemini and has been driven end to end in a real browser.
+**Deployed and public:** <https://sceneroom-320877670799.us-central1.run.app>
+Cloud Run, project `agent-era`, `min-instances 0` so it idles at ~$0 and
+`max-instances 3` so a public URL cannot run up a Gemini bill.
 
 | Piece | State |
 |---|---|
-| Agents — writer, reviser, extractor, verifier, fandom | ✅ `app/agents/` |
-| Workflow — draft → extract → check → decide → revise → re-check | ✅ `app/orchestrator.py` |
-| Parallel integration | ⚠️ code done (`app/services/parallel_client.py`), **running on offline fixtures — no API key yet** |
+| Agents — writer, reviser, extractor, **continuity**, verifier, fandom, **rights**, **adjudicator** | ✅ `app/agents/` |
+| Workflow — draft → extract → check → adjudicate → decide → revise → re-check | ✅ `app/orchestrator.py` |
+| Run streaming — per-agent events over SSE | ✅ `app/services/runs.py`, `/api/stream/scene` |
+| UI — production console, inline flags, contested lane, ledger strip | ✅ `frontend/` |
+| **Deployed hosted URL** | ✅ Cloud Run, least-privilege SA `sceneroom-run@agent-era` |
+| Parallel integration | ⚠️ Search API coded, **running on offline fixtures — no API key yet** |
+| Parallel **MCP server** | ❌ not built — PRD §4 calls for MCP *and* Search. Blocked on the key |
 | Claims ledger | ⚠️ in-memory; BigQuery implemented behind the same Protocol, switches on `BIGQUERY_DATASET` |
-| UI — script page, margin notes, provenance | ✅ `frontend/` |
-| Tests | ✅ 7 unit passing, ruff clean |
-| **Deployed hosted URL** | ❌ **not done — blocked on gcloud auth** |
+| Tests | ✅ 17 unit passing, ruff clean |
 | Imagen payoff frame | ❌ not started (`ENABLE_IMAGE` flag exists, unused) |
 | Demo video + Devpost write-up | ❌ not started |
+| `ARCHITECTURE.md`, ADRs, `PROGRESS.md` | ❌ not written — `hackathon-engineering` asks for these |
 
-Verified rather than assumed: Gemini drafts a scene with genuinely checkable
-detail, extraction returns 6–8 claims including audience-sensitivity ones, the
-pinned demo scene produces two sourced contradictions, and "Keep — deliberate"
-leaves the scene text untouched while recording the rationale in provenance.
+Verified rather than assumed, by driving the deployed page in a real browser:
+a live run streams all seven agents with real timings, the pinned demo scene
+produces two sourced contradictions plus a rights-clearance finding, and
+"Keep — deliberate" leaves the scene text untouched while recording the
+rationale in the ledger. No console errors.
 
-### Two blockers, both needing the human
+### One blocker, needing the human
 
-1. **`gcloud auth login`** — the token expired; non-interactive commands cannot
-   refresh it. Also decide *which project*: it currently defaults to `tgds-dev`,
-   which is a TrafficGuard work project, while the $100 hackathon credits are
-   likely on a personal account.
-2. **`PARALLEL_API_KEY`** — sign up at parallel.ai. Everything runs on offline
-   fixtures until then, and the UI says so honestly. This is a *scored,
-   mandatory* requirement, so it is the highest-value outstanding item.
+**`PARALLEL_API_KEY`** — sign up at <https://platform.parallel.ai>. Everything
+runs on offline fixtures until then, and the UI says so in the top bar. This is
+a *scored, mandatory* requirement and it also gates the MCP server work, so it
+is the highest-value outstanding item by a distance.
+
+### Traps this project has already fallen into
+
+- `GOOGLE_APPLICATION_CREDENTIALS` is exported in the shell profile pointing at
+  a TrafficGuard service-account key. It overrides ADC, so local runs silently
+  bill `tgds-dev`. Run local commands with `env -u GOOGLE_APPLICATION_CREDENTIALS`.
+- The `Dockerfile` copied `app/` but not `frontend/`. Because the static mount
+  is guarded by `FRONTEND.is_dir()`, the container started healthy and served
+  404 at `/` — a successful-looking deploy with no product in it. Guarded now by
+  `tests/unit/test_packaging.py`.
+- `/api/scenes/stream` was shadowed by `/api/scenes/{scene_id}` and 404'd as
+  "No such scene." Stream routes live under `/api/stream/` and
+  `tests/unit/test_routes.py` fails if a wildcard shadows one.
 
 ---
 
@@ -98,9 +113,23 @@ leaves the scene text untouched while recording the rationale in provenance.
 
 ```bash
 uv sync
-uv run --with pytest pytest tests/unit -q          # 7 tests
+uv run --with pytest pytest tests/unit -q          # 17 tests
 uv run --with ruff ruff check app tests
-uv run uvicorn app.fast_api_app:app --port 8080    # then open http://localhost:8080
+
+# -u GOOGLE_APPLICATION_CREDENTIALS matters: the shell profile exports a
+# TrafficGuard service-account key that overrides ADC and bills the wrong project.
+env -u GOOGLE_APPLICATION_CREDENTIALS GOOGLE_CLOUD_PROJECT=agent-era \
+  uv run uvicorn app.fast_api_app:app --port 8080   # then open http://localhost:8080
+```
+
+Redeploy:
+
+```bash
+gcloud run deploy sceneroom --source . --project agent-era --region us-central1 \
+  --service-account sceneroom-run@agent-era.iam.gserviceaccount.com \
+  --allow-unauthenticated --min-instances 0 --max-instances 3 \
+  --timeout 600 --cpu-boost --memory 1Gi \
+  --set-env-vars GOOGLE_CLOUD_PROJECT=agent-era,GOOGLE_CLOUD_LOCATION=global,GOOGLE_GENAI_USE_VERTEXAI=True
 ```
 
 `/api/health` reports whether Parallel is live and which ledger backend is

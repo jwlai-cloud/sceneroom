@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How Sceneroom was built</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap" rel="stylesheet">
+<style>
+/* The tutorial wears the product's clothes: same three meaning-carrying
+   colours, same serif/mono split. A teaching page for a design-led project
+   that looks like generic docs undercuts the thing it teaches. */
+:root{
+  --room:#12100f; --panel:#1b1918; --panel2:#232120; --line:#2d2b2b; --line-soft:#262424;
+  --text:#ece8e4; --dim:#9b9797; --faint:#7d7979;
+  --flag:#ff458e; --hold:#edbb00; --live:#38a6cf; --live-ink:#0088b0;
+  --mono:'Courier Prime','Courier New',ui-monospace,monospace;
+  --serif:'Source Serif 4',Georgia,serif;
+  --rail:290px;
+}
+@media (prefers-color-scheme: light){
+  :root{--room:#e8e4de;--panel:#faf9f6;--panel2:#f2efe9;--line:#c9c2b8;--line-soft:#d8d2c8;
+        --text:#221f1b;--dim:#57514a;--faint:#7d766c;
+        --flag:#c2004f;--hold:#8a6100;--live:#00637f;--live-ink:#004d63;}
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--room);color:var(--text);font-family:var(--serif);font-size:16px;line-height:1.6}
+a{color:var(--live);text-decoration:none;border-bottom:1px solid transparent}
+a:hover{border-bottom-color:currentColor}
+code,kbd{font-family:var(--mono);font-size:.88em}
+
+.wrap{display:grid;grid-template-columns:var(--rail) minmax(0,1fr);min-height:100vh}
+
+/* --- navigation ------------------------------------------------------- */
+nav{position:sticky;top:0;height:100vh;overflow-y:auto;padding:26px 18px 40px;
+    border-right:1px solid var(--line);background:var(--panel)}
+.brand{font-family:var(--mono);font-weight:700;letter-spacing:.2em;font-size:13px}
+.brand span{display:block;font-family:var(--serif);font-weight:400;letter-spacing:0;
+            font-size:13px;color:var(--faint);margin-top:6px;line-height:1.35}
+nav ol{list-style:none;margin-top:22px;counter-reset:s}
+nav li{counter-increment:s}
+nav ol a{display:block;padding:7px 10px 7px 34px;position:relative;color:var(--dim);
+      font-size:14px;border-radius:2px;border:0;line-height:1.35}
+nav ol a::before{content:counter(s,decimal-leading-zero);position:absolute;left:8px;
+      font-family:var(--mono);font-size:10px;color:var(--faint);top:9px}
+nav ol a:hover{color:var(--text);background:var(--panel2)}
+nav ol a.on{color:var(--text);background:var(--panel2);box-shadow:inset 2px 0 0 var(--live)}
+.navfoot{margin-top:24px;padding-top:16px;border-top:1px solid var(--line);
+         font-size:12.5px;display:grid;gap:8px}
+.navfoot a{color:var(--dim);border:0}
+.navfoot a:hover{color:var(--live)}
+
+/* --- content ---------------------------------------------------------- */
+main{padding:56px clamp(24px,5vw,80px) 120px;max-width:920px}
+header.top{margin-bottom:44px}
+h1{font-size:clamp(30px,4.2vw,46px);line-height:1.1;font-weight:600;letter-spacing:-.015em}
+.lede{margin-top:16px;font-size:19px;color:var(--dim);max-width:62ch}
+.meta{margin-top:22px;display:flex;flex-wrap:wrap;gap:10px}
+.chip{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+      padding:6px 10px;border:1px solid var(--line);border-radius:2px;color:var(--dim)}
+.chip.live{color:var(--live);border-color:color-mix(in srgb,var(--live) 45%,var(--line))}
+
+section{padding-top:48px;scroll-margin-top:24px}
+h2{font-size:27px;font-weight:600;letter-spacing:-.01em;line-height:1.2}
+h2 .n{font-family:var(--mono);font-size:12px;color:var(--faint);display:block;
+      letter-spacing:.18em;margin-bottom:8px}
+h3{font-size:18px;font-weight:600;margin-top:26px}
+p{margin-top:14px;max-width:66ch}
+ul{margin:14px 0 0 20px;max-width:64ch}
+li{margin-top:7px}
+strong{font-weight:700}
+
+pre{margin-top:18px;background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--live);
+    border-radius:2px;padding:14px 16px;overflow-x:auto}
+pre code{font-size:13px;line-height:1.55;color:var(--text)}
+.term{border-left-color:var(--faint)}
+.term code{color:var(--dim)}
+
+/* A trap is the most valuable thing on the page — it gets the loud colour. */
+.trap{margin-top:20px;padding:14px 16px;border:1px dashed color-mix(in srgb,var(--hold) 45%,var(--line));
+      border-left:4px solid var(--hold);background:color-mix(in srgb,var(--hold) 7%,transparent);
+      border-radius:2px}
+.trap b{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.12em;
+        text-transform:uppercase;color:var(--hold);margin-bottom:6px}
+.trap p{margin-top:0;font-size:15px;color:var(--dim)}
+
+.refs{margin-top:18px;display:grid;gap:6px}
+.refs a{font-family:var(--mono);font-size:12.5px;color:var(--dim);display:flex;gap:9px;border:0}
+.refs a:hover{color:var(--live)}
+.refs .k{color:var(--faint);min-width:118px}
+
+table{width:100%;border-collapse:collapse;margin-top:20px;font-size:14.5px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+th{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+
+.verdict{font-family:var(--mono);font-size:11px;padding:2px 6px;border-radius:2px}
+.bad{color:var(--flag);background:color-mix(in srgb,var(--flag) 14%,transparent)}
+.ok{color:var(--live);background:color-mix(in srgb,var(--live) 14%,transparent)}
+.warn{color:var(--hold);background:color-mix(in srgb,var(--hold) 14%,transparent)}
+
+.tip{margin-top:16px;font-size:14.5px;color:var(--faint);border-left:2px solid var(--line);padding-left:12px}
+
+@media (max-width:900px){
+  .wrap{grid-template-columns:1fr}
+  nav{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+  nav ol{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<nav aria-label="Contents">
+  <div class="brand">SCENEROOM<span>How it was built — decisions, sources, and the five times the docs were wrong.</span></div>
+  <ol id="toc">
+    <li><a href="#what">What it does</a></li>
+    <li><a href="#agents">Agents with a schema</a></li>
+    <li><a href="#notools">Agents hold no tools</a></li>
+    <li><a href="#mcp">MCP, for one agent</a></li>
+    <li><a href="#graph">Where a graph beats a loop</a></li>
+    <li><a href="#guarantee">A guarantee in code</a></li>
+    <li><a href="#sse">Streaming the wait</a></li>
+    <li><a href="#ledger">An append-only ledger</a></li>
+    <li><a href="#deploy">Deploying</a></li>
+    <li><a href="#eval">Evaluating</a></li>
+    <li><a href="#wrong">Five times docs were wrong</a></li>
+    <li><a href="#run">Run it yourself</a></li>
+  </ol>
+  <div class="navfoot">
+    <a href="sceneroom-agents.html">↗ Agent topology (interactive)</a>
+    <a href="sceneroom-run.html">↗ One pass, end to end</a>
+    <a href="adr/">↗ Decision records</a>
+    <a href="https://github.com/jwlai-cloud/sceneroom">↗ Source</a>
+  </div>
+</nav>
+
+<main>
+<header class="top">
+  <h1>How Sceneroom was built</h1>
+  <p class="lede">A walk through the decisions, with links to the primary sources for each.
+     Read this if you want to build something similar — or to know which of our choices
+     you should copy and which you should not.</p>
+  <div class="meta">
+    <span class="chip live">7 agents · ADK 2.6.1</span>
+    <span class="chip">Gemini on Vertex</span>
+    <span class="chip">Parallel Search + MCP</span>
+    <span class="chip">BigQuery ledger</span>
+    <span class="chip">Cloud Run</span>
+  </div>
+</header>
+
+<section id="what">
+  <h2><span class="n">01</span>What it does</h2>
+  <p>A writer gives an intent. Seven Gemini agents draft a scene, extract every checkable
+     claim, check each against the production bible and the open web, and classify it
+     <code>verified</code> / <code>contradicted</code> / <code>contested</code> /
+     <code>unverifiable</code>. Claims needing a human are routed by a pure function. The
+     writer chooses <strong>fix</strong>, <strong>keep — deliberate</strong>, or
+     <strong>escalate</strong>, and the choice plus its reason and sources is appended to
+     BigQuery. One generated frame closes the loop.</p>
+  <p>The product is not a fact-checker. It is a record of what was checked, against which
+     source, decided by whom, and why.</p>
+</section>
+
+<section id="agents">
+  <h2><span class="n">02</span>Agents: a schema, not a chat loop</h2>
+  <p>Every agent is a single-turn ADK <code>LlmAgent</code> with an
+     <code>output_schema</code>. No tool loop, no retries, no conversation — so downstream
+     code never parses prose.</p>
+<pre><code>from google.adk.agents import LlmAgent
+
+def build_verifier() -> LlmAgent:
+    return LlmAgent(
+        name="verifier",
+        model=MODEL,                        # gemini-flash-latest
+        instruction=VERIFIER_INSTRUCTION,
+        output_schema=VerificationResult,   # a pydantic model
+        output_key="verification",
+    )</code></pre>
+  <div class="trap"><b>Worth knowing</b>
+    <p>ADK 2.5+ supports <code>output_schema</code> <em>together with</em> <code>tools</code> —
+       tools run during the thought loop, structure is enforced on the final answer. Older
+       guidance says they are mutually exclusive. Check the installed package.</p></div>
+  <div class="refs">
+    <a href="https://adk.dev/agents/"><span class="k">ADK agents</span> adk.dev/agents/</a>
+    <a href="https://adk.dev/agents/llm-agents/"><span class="k">LlmAgent</span> adk.dev/agents/llm-agents/</a>
+    <a href="https://adk.dev/runtime/"><span class="k">Runners</span> adk.dev/runtime/</a>
+  </div>
+</section>
+
+<section id="notools">
+  <h2><span class="n">03</span>The decision that shaped everything</h2>
+  <p><strong>No agent holds a retrieval tool.</strong> Retrieval lives in Python; the
+     orchestrator calls Parallel and pastes the sources into the prompt. The Verifier is
+     told outright: <em>"You do not use prior knowledge as evidence — only what the sources
+     say."</em></p>
+  <ul>
+    <li><strong>A citation cannot be hallucinated</strong> — every URL came out of an API response.</li>
+    <li><strong>The pipeline is deterministic</strong> — control flow, not a model choosing a next step.</li>
+    <li><strong>"No sources" stays honest</strong> — the code short-circuits to <code>unverifiable</code> <em>before</em> any model call.</li>
+  </ul>
+  <p>The cost is real: a tool-using agent can chase a lead it notices mid-answer; ours
+     cannot. <strong>Copy this if</strong> your claim is about provenance. <strong>Don't</strong>
+     if you need open-ended research.</p>
+  <div class="refs"><a href="adr/001-agents-have-no-tools.md"><span class="k">ADR 001</span> Agents have no tools</a></div>
+</section>
+
+<section id="mcp">
+  <h2><span class="n">04</span>MCP, for exactly one agent</h2>
+  <p>The Fandom agent asks <em>what has this audience already litigated?</em> That is
+     iterative — spot a controversy, read the objection, trace what it cost. One fixed
+     query answers a shallower question. So it gets Parallel's MCP server.</p>
+<pre><code>from google.adk.tools.mcp_tool import MCPToolset, StreamableHTTPConnectionParams
+
+MCPToolset(
+    connection_params=StreamableHTTPConnectionParams(
+        url="https://search.parallel.ai/mcp",
+        headers={"Authorization": f"Bearer {key}"},
+    ),
+    tool_filter=["web_search", "web_fetch"],
+)</code></pre>
+  <div class="trap"><b>Trap — cost an hour</b>
+    <p><code>mcp</code> 2.x moved <code>mcp.shared.session</code>, which ADK imports. Install
+       plain <code>mcp</code> and you get 2.x, ADK catches the <code>ImportError</code>,
+       <strong>logs it at debug</strong>, and the toolset silently disappears. Pin
+       <code>mcp&lt;2.0</code>.</p></div>
+  <div class="refs">
+    <a href="https://adk.dev/tools/mcp-tools/"><span class="k">ADK + MCP</span> adk.dev/tools/mcp-tools/</a>
+    <a href="https://docs.parallel.ai/integrations/mcp/search-mcp"><span class="k">Parallel MCP</span> docs.parallel.ai</a>
+    <a href="https://modelcontextprotocol.io/"><span class="k">MCP spec</span> modelcontextprotocol.io</a>
+    <a href="adr/004-mcp-for-one-agent-only.md"><span class="k">ADR 004</span> MCP for one agent only</a>
+  </div>
+</section>
+
+<section id="graph">
+  <h2><span class="n">05</span>Where a graph beats a loop</h2>
+  <p>Choosing <strong>fix it</strong> used to accept any non-empty rewrite — so a revision
+     that changed the wording but not the fact sailed into another 30-second round of live
+     checking. We built the fix path twice: first as a <code>LoopAgent</code>, then as an
+     ADK <strong>Workflow graph</strong>.</p>
+<pre><code>from google.adk import Agent, Event, Workflow
+
+def route(node_input) -> Event:
+    return Event(route=[decide_route(result, node_input)])   # a pure function
+
+Workflow(
+    name="revise_until_fixed",
+    edges=[
+        ("START", prepare, reviser, stash, critic, route),
+        (route, {"retry": prepare, "done": finish}),
+    ],
+)</code></pre>
+  <p>Edges are <strong>tuple chains</strong>; a <code>dict</code> inside a chain is a routing
+     map. <code>"START"</code> is a string. A node routes by emitting
+     <code>Event(route=[...])</code>, matched <strong>exactly</strong> against edge keys.</p>
+  <p><strong>Why the graph won</strong> — and it is not the deprecation warning: the routing
+     decision becomes a plain function. The docs describe the graph API as <em>"switching
+     between non-deterministic AI-powered agents and deterministic code as needed"</em>.
+     <code>LoopAgent</code> terminates on <code>escalate</code>, set inside a tool on the
+     model's own agent, so the decision to stop lived with the model.</p>
+  <div class="trap"><b>Two traps</b>
+    <p><strong>1.</strong> An <code>LlmAgent</code> used as a node runs <code>single_turn</code>
+       with <code>include_contents='none'</code> — it does <em>not</em> see the conversation;
+       input arrives as <code>node_input</code>.<br>
+       <strong>2.</strong> Route keys match exactly. Our model answered <code>"Not Fixed"</code>
+       against a <code>"not_fixed"</code> edge, nothing matched, and the branch ended
+       silently. Normalise the key <em>in code</em>, never by asking the prompt nicely.</p></div>
+  <div class="refs">
+    <a href="https://adk.dev/graphs/"><span class="k">Graph workflows</span> adk.dev/graphs/</a>
+    <a href="https://adk.dev/graphs/data-handling/"><span class="k">Node data</span> adk.dev/graphs/data-handling/</a>
+    <a href="adr/007-workflow-graph-over-loopagent.md"><span class="k">ADR 007</span> Workflow graph over LoopAgent</a>
+  </div>
+</section>
+
+<section id="guarantee">
+  <h2><span class="n">06</span>The guarantee that is code</h2>
+  <p>The hard rule: contested history always reaches a human. That is a pure function, not
+     an instruction.</p>
+<pre><code>def route(claim: Claim, mode: Mode) -> tuple[bool, str]:
+    if claim.verdict == Verdict.CONTESTED:
+        return True, "Sources actively disagree. This system does not adjudicate disputes."
+    ...</code></pre>
+  <p>A guarantee implemented as a prompt drifts with model versions, can be argued out of,
+     and cannot be tested except by sampling. This one has six tests.</p>
+  <p class="tip"><strong>The transferable idea.</strong> If your agent has one property you
+     would be embarrassed to get wrong, implement it in code and test it. Everything else
+     can be a prompt.</p>
+  <div class="refs"><a href="adr/002-escalation-is-code-not-a-prompt.md"><span class="k">ADR 002</span> Escalation is code</a></div>
+</section>
+
+<section id="sse">
+  <h2><span class="n">07</span>Streaming the wait, because the wait is the product</h2>
+  <p>A pass takes ~30 seconds, measured. The UI showed one unchanging sentence for all of
+     it — which reads as a hang, and hides the only moment the system is visibly
+     multi-step.</p>
+<pre><code>return StreamingResponse(
+    events(), media_type="text/event-stream",
+    headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+)</code></pre>
+  <p>SSE, not polling: polling needs shared state, and Cloud Run spreads polls across
+     instances, so a poll often lands on an instance that never saw the run.</p>
+  <div class="trap"><b>Knock-on effect</b>
+    <p><code>EventSource</code> can only issue <strong>GET</strong> and cannot set headers.
+       That decided two later designs: the brief travels as query parameters, and the
+       access gate is a cookie rather than a header.</p></div>
+  <div class="refs">
+    <a href="https://fastapi.tiangolo.com/advanced/custom-response/#streamingresponse"><span class="k">FastAPI</span> StreamingResponse</a>
+    <a href="https://developer.mozilla.org/en-US/docs/Web/API/EventSource"><span class="k">MDN</span> EventSource</a>
+    <a href="adr/005-stream-runs-over-sse.md"><span class="k">ADR 005</span> SSE over polling</a>
+  </div>
+</section>
+
+<section id="ledger">
+  <h2><span class="n">08</span>An append-only ledger, holding scenes too</h2>
+  <p>Two BigQuery tables, written on every change. Memory is a read cache; a miss falls
+     back to a query.</p>
+<pre><code>self._client.insert_rows_json(table, [row])   # streaming insert, queryable at once</code></pre>
+  <div class="trap"><b>The bug this fixed</b>
+    <p><code>save_scene</code> was inherited from the in-memory class, so scenes lived only
+       in the instance that drafted them. On Cloud Run a writer could draft on one instance
+       and land their decision on another — <em>"No such scene"</em>, decision lost. Visible
+       only under concurrent load, i.e. exactly during judging.</p></div>
+  <div class="refs">
+    <a href="https://cloud.google.com/bigquery/docs/streaming-data-into-bigquery"><span class="k">BigQuery</span> streaming inserts</a>
+    <a href="adr/006-append-only-ledger-in-bigquery.md"><span class="k">ADR 006</span> Append-only ledger</a>
+  </div>
+</section>
+
+<section id="deploy">
+  <h2><span class="n">09</span>Deploying: Cloud Run, scale to zero</h2>
+<pre class="term"><code>gcloud run deploy sceneroom --source . \
+  --min-instances 0 --max-instances 3 --timeout 600 --cpu-boost \
+  --service-account sceneroom-run@PROJECT.iam.gserviceaccount.com \
+  --set-secrets PARALLEL_API_KEY=parallel-api-key:latest</code></pre>
+  <p><code>min-instances 0</code> means ~$0 idle — the service must survive nine weeks of
+     judging on a small credit. <code>max-instances 3</code> caps what a public URL can
+     spend. No key material exists in the container; Vertex authenticates through the
+     metadata server.</p>
+  <div class="trap"><b>The bug that looked like success</b>
+    <p>The Dockerfile copied <code>app/</code> but not <code>frontend/</code>. Because the
+       static mount is guarded by <code>FRONTEND.is_dir()</code>, the container started
+       healthy, passed <code>/api/health</code>, and served 404 at <code>/</code>. A deploy
+       that looked perfect and had no product in it.</p></div>
+  <div class="refs">
+    <a href="https://cloud.google.com/run/docs/deploying-source-code"><span class="k">Cloud Run</span> deploy from source</a>
+    <a href="https://cloud.google.com/run/docs/configuring/services/secrets"><span class="k">Secret Manager</span> with Cloud Run</a>
+    <a href="adr/003-cloud-run-not-agent-engine.md"><span class="k">ADR 003</span> Cloud Run, not Agent Engine</a>
+  </div>
+</section>
+
+<section id="eval">
+  <h2><span class="n">10</span>Evaluating: measure the thing, not the vibe</h2>
+  <p>Fifteen claims with known answers, run through the real verification path. Two error
+     types scored <strong>separately</strong>, because they are not equally bad.</p>
+  <table>
+    <tr><th>Setting</th><th>Correct</th><th>Missed</th><th>Wrong</th></tr>
+    <tr><td><code>base</code></td><td>10 / 15</td><td><span class="verdict warn">5</span></td><td><span class="verdict ok">0</span></td></tr>
+    <tr><td><code>pro</code></td><td>13 / 15</td><td><span class="verdict warn">1</span></td><td><span class="verdict bad">1 ←</span></td></tr>
+    <tr><td><code>pro</code>, after the fix</td><td>12 / 15</td><td><span class="verdict warn">3</span></td><td><span class="verdict ok">0</span></td></tr>
+  </table>
+  <p>The eval contradicted us on its first run. The "better" setting scored higher
+     <em>and</em> ruled on whether Sejong invented Hangul unaided — which specialists
+     genuinely dispute, and which is the one thing this product must never do. The fix was
+     an instruction, not a model. We traded one correct answer for zero wrong calls.</p>
+  <p class="tip"><strong>A miss costs a decision. A wrong call ships an error.</strong>
+     Averaging them into one accuracy number hides exactly the failure you care about.</p>
+  <div class="trap"><b>Why not <code>agents-cli eval</code>?</b>
+    <p>It drives an agent over ADK's session protocol
+       (<code>/apps/&lt;app&gt;/users/&lt;u&gt;/sessions</code>). Sceneroom serves its own API and has
+       no single <code>root_agent</code>, so <code>eval generate</code> 404s — tested, not
+       assumed. If you <em>are</em> building a conventional ADK agent, use it: LLM-judge
+       metrics and <code>eval compare</code> for free.</p></div>
+  <div class="refs">
+    <a href="https://google.github.io/adk-docs/evaluate/"><span class="k">ADK eval</span> google.github.io/adk-docs/evaluate/</a>
+  </div>
+</section>
+
+<section id="wrong">
+  <h2><span class="n">11</span>Five times the docs were wrong</h2>
+  <p>The single most useful habit on this project: <strong>check the installed package or
+     the live API, never the summary.</strong></p>
+  <table>
+    <tr><th>The claim</th><th>The reality</th></tr>
+    <tr><td>ADK graph edges are a 3-tuple</td><td>Tuple chains with a <code>{route: target}</code> dict</td></tr>
+    <tr><td><code>load_skills_from_dir</code> exists</td><td>It does not — only the singular <code>load_skill_from_dir</code></td></tr>
+    <tr><td><code>pip install mcp</code> works with ADK</td><td>2.x moved a module ADK imports; the toolset vanishes <em>silently</em></td></tr>
+    <tr><td><code>imagen-*</code> is the image model</td><td>Unavailable to this project; <code>generate_images</code> deprecated</td></tr>
+    <tr><td>A <code>Workflow</code> node cannot see context</td><td>It can — state persists across nodes. <strong>This one was our error</strong></td></tr>
+  </table>
+  <p>The last was ours, from reading ADK's source instead of its documentation — because
+     the cached docs we had were five months stale and predated the graph API entirely.</p>
+  <div class="refs">
+    <a href="https://adk.dev/llms.txt"><span class="k">ADK index</span> adk.dev/llms.txt</a>
+    <a href="https://adk.dev/llms-full.txt"><span class="k">ADK full text</span> adk.dev/llms-full.txt</a>
+  </div>
+</section>
+
+<section id="run">
+  <h2><span class="n">12</span>Run it yourself</h2>
+<pre class="term"><code>uv sync
+uv run --with pytest pytest tests -q          # 47 tests
+uv run --with ruff ruff check app tests evals tools
+
+env -u GOOGLE_APPLICATION_CREDENTIALS GOOGLE_CLOUD_PROJECT=&lt;project&gt; \
+  uv run uvicorn app.fast_api_app:app --port 8080</code></pre>
+  <p><code>/api/health</code> reports whether Parallel is live, which ledger is active, and
+     who escalations route to. Check it first when something looks wrong.</p>
+  <p>Without a <code>PARALLEL_API_KEY</code> everything still runs on offline fixtures, and
+     the UI says so in the top bar — a demo must never pass fixture data off as live
+     search.</p>
+  <h3>Reference index</h3>
+  <div class="refs">
+    <a href="https://adk.dev/"><span class="k">ADK</span> adk.dev</a>
+    <a href="https://adk.dev/graphs/"><span class="k">Graph workflows</span> adk.dev/graphs/</a>
+    <a href="https://adk.dev/tools/mcp-tools/"><span class="k">MCP tools</span> adk.dev/tools/mcp-tools/</a>
+    <a href="https://docs.parallel.ai/"><span class="k">Parallel</span> docs.parallel.ai</a>
+    <a href="https://modelcontextprotocol.io/"><span class="k">MCP</span> modelcontextprotocol.io</a>
+    <a href="https://cloud.google.com/vertex-ai/generative-ai/docs"><span class="k">Vertex AI</span> generative AI docs</a>
+    <a href="https://cloud.google.com/run/docs"><span class="k">Cloud Run</span> cloud.google.com/run/docs</a>
+    <a href="https://cloud.google.com/bigquery/docs/streaming-data-into-bigquery"><span class="k">BigQuery</span> streaming inserts</a>
+    <a href="https://cloud.google.com/secret-manager/docs"><span class="k">Secret Manager</span> cloud.google.com/secret-manager</a>
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+// Scrollspy: the nav should say where you are without being asked.
+const links = [...document.querySelectorAll('#toc a')];
+const map = new Map(links.map(a => [a.getAttribute('href').slice(1), a]));
+const spy = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    links.forEach(a => a.classList.remove('on'));
+    map.get(e.target.id)?.classList.add('on');
+  });
+}, { rootMargin: '-10% 0px -75% 0px', threshold: 0 });
+document.querySelectorAll('section[id]').forEach(s => spy.observe(s));
+</script>
+</body>
+</html>

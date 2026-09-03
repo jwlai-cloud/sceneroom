@@ -34,6 +34,45 @@ logger = logging.getLogger(__name__)
 APP_NAME = "sceneroom"
 
 
+async def run_agent_state(agent, prompt: str) -> dict:
+    """Run an agent (or a workflow of them) and return the session state.
+
+    `run_agent` returns the *last* thing said, which is the wrong thing for a
+    LoopAgent: the final speaker is the critic, while the artefact we want is
+    the reviser's output from an earlier turn. Every agent writes to its
+    `output_key`, so the accumulated state is where a multi-agent result lives.
+    """
+    runner = InMemoryRunner(agent=agent, app_name=APP_NAME)
+    user_id = "sceneroom"
+    session_id = f"s-{uuid.uuid4().hex[:12]}"
+    await runner.session_service.create_session(
+        app_name=APP_NAME, user_id=user_id, session_id=session_id
+    )
+
+    message = types.Content(role="user", parts=[types.Part.from_text(text=prompt)])
+    try:
+        async for _ in runner.run_async(
+            user_id=user_id, session_id=session_id, new_message=message
+        ):
+            pass
+    except Exception as exc:
+        logger.error("Workflow %s failed: %s", getattr(agent, "name", agent), exc)
+        return {}
+
+    session = await runner.session_service.get_session(
+        app_name=APP_NAME, user_id=user_id, session_id=session_id
+    )
+    state = dict(session.state or {})
+    # output_schema agents store their result as a JSON string.
+    for key, value in list(state.items()):
+        if isinstance(value, str) and value.strip().startswith("{"):
+            try:
+                state[key] = json.loads(value)
+            except json.JSONDecodeError:
+                pass
+    return state
+
+
 async def run_agent(agent: LlmAgent, prompt: str) -> dict:
     """Run a single-turn structured agent and return its parsed output.
 

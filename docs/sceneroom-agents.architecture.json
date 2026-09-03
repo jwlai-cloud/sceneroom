@@ -1,0 +1,459 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Sceneroom \u2014 ADK agent topology",
+    "subtitle": "Seven Gemini agents on a deterministic Python rail, plus an ADK Workflow graph where a loop is genuinely the right shape.",
+    "output": "sceneroom-agents.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/jwlai-cloud/sceneroom",
+      "revision": "17c790cb8c5f73d91df29994065b56c2d77ffaa4"
+    },
+    "views": [
+      {
+        "id": "draft-path",
+        "label": "Draft and extract",
+        "focus": [
+          "room",
+          "orchestrator",
+          "writer",
+          "extractor"
+        ],
+        "note": "The brief becomes a scene, then the scene becomes a list of checkable claims."
+      },
+      {
+        "id": "evidence-path",
+        "label": "Where evidence comes from",
+        "focus": [
+          "orchestrator",
+          "parallel",
+          "verifier",
+          "fandom",
+          "rights"
+        ],
+        "note": "The orchestrator retrieves. Agents only judge sources handed to them, so a citation cannot be invented."
+      },
+      {
+        "id": "escalation",
+        "label": "Who decides",
+        "focus": [
+          "adjudicator",
+          "orchestrator",
+          "ledger"
+        ],
+        "note": "Routing is a pure function; the model only writes the handoff note for a contested claim."
+      },
+      {
+        "id": "record",
+        "label": "The provenance record",
+        "focus": [
+          "room",
+          "orchestrator",
+          "ledger"
+        ],
+        "note": "Every verdict, decision and rationale is appended, never edited."
+      },
+      {
+        "id": "revise",
+        "label": "Fixing, and checking the fix",
+        "focus": [
+          "orchestrator",
+          "reviseloop",
+          "verifier"
+        ],
+        "note": "Choosing 'fix it' revises, judges the revision, and routes in code \u2014 only then re-checking against the web."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "room",
+      "type": "frontend",
+      "label": "Scene room UI",
+      "sublabel": "inline flags \u00b7 SSE stream",
+      "tag": "EventSource",
+      "pos": [
+        40,
+        318
+      ],
+      "size": [
+        150,
+        84
+      ],
+      "sources": [
+        {
+          "path": "frontend/app.js",
+          "label": "console + run stream"
+        }
+      ]
+    },
+    {
+      "id": "orchestrator",
+      "type": "backend",
+      "label": "Orchestrator",
+      "sublabel": "deterministic Python control flow",
+      "tag": "the only caller",
+      "pos": [
+        280,
+        318
+      ],
+      "size": [
+        170,
+        84
+      ],
+      "sources": [
+        {
+          "path": "app/orchestrator.py",
+          "label": "draft \u2192 check \u2192 adjudicate"
+        }
+      ]
+    },
+    {
+      "id": "writer",
+      "type": "cloud",
+      "label": "Writer",
+      "sublabel": "intent -> scene",
+      "pos": [
+        560,
+        40
+      ],
+      "size": [
+        180,
+        62
+      ],
+      "sources": [
+        {
+          "path": "app/agents/writer.py",
+          "line": 65
+        }
+      ]
+    },
+    {
+      "id": "extractor",
+      "type": "cloud",
+      "label": "Extractor",
+      "sublabel": "scene \u2192 claims with excerpts",
+      "pos": [
+        560,
+        132
+      ],
+      "size": [
+        180,
+        62
+      ],
+      "sources": [
+        {
+          "path": "app/agents/extractor.py",
+          "line": 73
+        }
+      ]
+    },
+    {
+      "id": "continuity",
+      "type": "cloud",
+      "label": "Continuity",
+      "sublabel": "canon vs the production bible",
+      "tag": "cannot search",
+      "pos": [
+        560,
+        224
+      ],
+      "size": [
+        180,
+        62
+      ],
+      "sources": [
+        {
+          "path": "app/agents/continuity.py"
+        }
+      ]
+    },
+    {
+      "id": "verifier",
+      "type": "cloud",
+      "label": "Verifier",
+      "sublabel": "is the claim true?",
+      "pos": [
+        560,
+        330
+      ],
+      "size": [
+        180,
+        62
+      ],
+      "sources": [
+        {
+          "path": "app/agents/verifier.py",
+          "line": 102
+        }
+      ]
+    },
+    {
+      "id": "fandom",
+      "type": "cloud",
+      "label": "Fandom",
+      "sublabel": "what has this audience litigated?",
+      "pos": [
+        560,
+        422
+      ],
+      "size": [
+        180,
+        62
+      ],
+      "sources": [
+        {
+          "path": "app/agents/verifier.py",
+          "line": 113
+        }
+      ]
+    },
+    {
+      "id": "rights",
+      "type": "cloud",
+      "label": "Rights",
+      "sublabel": "does using it need permission?",
+      "tag": "never says cleared",
+      "pos": [
+        560,
+        514
+      ],
+      "size": [
+        180,
+        62
+      ],
+      "sources": [
+        {
+          "path": "app/agents/rights.py"
+        }
+      ]
+    },
+    {
+      "id": "adjudicator",
+      "type": "cloud",
+      "label": "Adjudicator",
+      "sublabel": "route() decides; the model only writes the note",
+      "pos": [
+        560,
+        620
+      ],
+      "size": [
+        180,
+        62
+      ],
+      "sources": [
+        {
+          "path": "app/agents/adjudicator.py",
+          "line": 90,
+          "label": "route() + handoff note"
+        }
+      ],
+      "tag": "routing is code"
+    },
+    {
+      "id": "parallel",
+      "type": "external",
+      "label": "Parallel Search",
+      "sublabel": "the only route to the open web",
+      "pos": [
+        40,
+        470
+      ],
+      "size": [
+        170,
+        62
+      ],
+      "sources": [
+        {
+          "path": "app/services/parallel_client.py",
+          "line": 45
+        }
+      ]
+    },
+    {
+      "id": "ledger",
+      "type": "database",
+      "label": "Claims ledger",
+      "sublabel": "append-only provenance",
+      "tag": "BigQuery on env",
+      "pos": [
+        850,
+        318
+      ],
+      "size": [
+        160,
+        84
+      ],
+      "sources": [
+        {
+          "path": "app/services/ledger.py"
+        }
+      ]
+    },
+    {
+      "id": "reviseloop",
+      "type": "cloud",
+      "label": "Revise graph",
+      "sublabel": "reviser -> critic -> route, until the fix lands",
+      "tag": "ADK Workflow",
+      "pos": [
+        560,
+        712
+      ],
+      "size": [
+        180,
+        62
+      ],
+      "sources": [
+        {
+          "path": "app/agents/revise_workflow.py",
+          "label": "Workflow + Event(route=...)"
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Vertex AI \u00b7 gemini-flash-latest \u2014 each agent is one ADK LlmAgent: single turn, structured output, no tools",
+      "wraps": [
+        "writer",
+        "extractor",
+        "continuity",
+        "verifier",
+        "fandom",
+        "rights",
+        "adjudicator",
+        "reviseloop"
+      ],
+      "pad": 26
+    }
+  ],
+  "connections": [
+    {
+      "id": "brief",
+      "from": "room",
+      "to": "orchestrator",
+      "label": "brief",
+      "variant": "emphasis"
+    },
+    {
+      "id": "draft",
+      "from": "orchestrator",
+      "to": "writer"
+    },
+    {
+      "id": "extract",
+      "from": "orchestrator",
+      "to": "extractor"
+    },
+    {
+      "id": "canon",
+      "from": "orchestrator",
+      "to": "continuity"
+    },
+    {
+      "id": "verify",
+      "from": "orchestrator",
+      "to": "verifier",
+      "variant": "emphasis"
+    },
+    {
+      "id": "precedent",
+      "from": "orchestrator",
+      "to": "fandom"
+    },
+    {
+      "id": "clearance",
+      "from": "orchestrator",
+      "to": "rights"
+    },
+    {
+      "id": "retrieve",
+      "from": "orchestrator",
+      "to": "parallel",
+      "variant": "security",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "id": "record",
+      "from": "orchestrator",
+      "to": "ledger",
+      "label": "verdicts + decisions",
+      "variant": "emphasis",
+      "fromSide": "bottom",
+      "toSide": "bottom",
+      "via": [
+        [
+          365,
+          830
+        ],
+        [
+          930,
+          830
+        ]
+      ]
+    },
+    {
+      "id": "stream",
+      "from": "orchestrator",
+      "to": "room",
+      "label": "run events",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "top"
+    },
+    {
+      "id": "adjudicate",
+      "from": "orchestrator",
+      "to": "adjudicator",
+      "variant": "security"
+    },
+    {
+      "id": "revise",
+      "from": "orchestrator",
+      "to": "reviseloop",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Why agents have no tools",
+      "items": [
+        "Retrieval lives in Python, so a citation cannot be hallucinated",
+        "The sequence is control flow, not a model choosing a next step",
+        "No sources short-circuits to unverifiable before any model call"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Two questions, not one",
+      "items": [
+        "Verifier asks whether the claim is true",
+        "Fandom asks what this audience has already litigated",
+        "Rights asks whether using it needs permission"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "The guarantee is code",
+      "items": [
+        "route() decides escalation as a pure, tested function",
+        "Contested always reaches a human, in both production modes",
+        "The model never rules on which side of a dispute is right"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Where a graph earns its place",
+      "items": [
+        "A rewrite used to be accepted if it was merely non-empty",
+        "Routing is a plain function, not a model \u2014 ADR 002 restated",
+        "It cannot search: a model must not verify its own homework"
+      ]
+    }
+  ]
+}

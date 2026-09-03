@@ -91,11 +91,30 @@ class Claim(BaseModel):
         description="Why the human decided this. Required for keep_deliberate.",
     )
 
+    # Rights agent. Never "cleared" — this system surfaces exposure, it does not
+    # clear anything. See agents/rights.py.
+    rights_status: str = ""
+    rights_action: str = ""
+
+    # Continuity agent: what the production bible says instead, quoted.
+    bible_says: str = ""
+
+    # Adjudicator. `escalation_reason` is set by a pure rule (adjudicator.route),
+    # never by a model. `handoff` is the model-written brief for the human, and
+    # exists only for contested claims.
+    needs_human: bool = False
+    escalation_reason: str = ""
+    handoff: str = ""
+
     @property
     def needs_attention(self) -> bool:
-        return (
-            self.verdict in (Verdict.CONTRADICTED, Verdict.CONTESTED)
-            and self.disposition == Disposition.PENDING
+        # `needs_human` is what the Adjudicator decided, and it escalates things
+        # this list would otherwise miss — an unestablished rights position is
+        # UNVERIFIABLE and still has to reach clearance. Without it, such a
+        # claim stayed out of `open_flags`, so the scene read as signed off and
+        # the frame endpoint would render it.
+        return self.disposition == Disposition.PENDING and (
+            self.needs_human or self.verdict in (Verdict.CONTRADICTED, Verdict.CONTESTED)
         )
 
 
@@ -111,6 +130,11 @@ class Scene(BaseModel):
     revision: int = 1
     claims: list[Claim] = Field(default_factory=list)
     frame_url: str = ""
+
+    # The production bible: internal canon the Continuity agent checks against.
+    # Plain text, because a real bible is prose and parsing it into a schema
+    # would lose exactly the nuance continuity turns on.
+    bible: str = ""
 
     @property
     def open_flags(self) -> list[Claim]:

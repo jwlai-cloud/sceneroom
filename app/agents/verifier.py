@@ -40,6 +40,11 @@ class VerificationResult(BaseModel):
     reasoning: str = Field(description="One or two sentences, citing the sources.")
 
 
+class FoundSource(BaseModel):
+    title: str = Field(description="The page title, as found.")
+    url: str = Field(description="The exact URL. Never a URL you did not open.")
+
+
 class FandomResult(BaseModel):
     is_flashpoint: bool = Field(
         description="True if this audience is known to scrutinise or dispute this."
@@ -51,6 +56,13 @@ class FandomResult(BaseModel):
         )
     )
     reasoning: str = Field(description="One or two sentences, citing the sources.")
+    sources: list[FoundSource] = Field(
+        default_factory=list,
+        description=(
+            "Only used when this agent searched for itself. Every source must be "
+            "one it actually retrieved."
+        ),
+    )
 
 
 VERIFIER_INSTRUCTION = """
@@ -72,6 +84,24 @@ Choose exactly one verdict:
 Critical: when the topic is contested, your job is to say so — not to pick the
 side you find more persuasive. Taking a position on a live historical or
 political dispute is the single worst thing this system can do.
+
+Before you answer `verified` or `contradicted`, check whether the question is
+one specialists actually argue about. Attribution and authorship, who
+originated something, the boundaries and allegiance of historical polities,
+responsibility for events, and the motives of real people are disputed far more
+often than they look. If reputable sources take different positions — even when
+one is more common, more recent, or better argued — that is `contested`.
+
+A majority view is not a settled question. Preferring the majority is exactly
+the judgement this system refuses to make.
+
+Watch the absolutes. When a claim about origination or authorship carries a
+word like "alone", "personally", "unaided", "without help", "first" or "the
+only", that qualifier is usually the disputed part, not incidental wording.
+Sources describing other contributors do not make such a claim `contradicted` —
+they are one side of the argument the claim takes a position on. That is
+`contested`. Reserve `contradicted` for claims whose factual core fails: a
+wrong date, a wrong place, an object that did not yet exist.
 
 Keep the reasoning to one or two sentences, and refer to what the sources
 actually said.
@@ -110,12 +140,40 @@ def build_verifier() -> LlmAgent:
     )
 
 
-def build_fandom() -> LlmAgent:
+FANDOM_MCP_INSTRUCTION = (
+    FANDOM_INSTRUCTION
+    + """
+
+You have web_search and web_fetch. Use them — this question is not answerable
+in one query. Work like a researcher:
+
+1. Search for how productions set in this period have been received.
+2. When a search result hints at a controversy, fetch that page and read what
+   the objection actually was and what it cost the production.
+3. Search again for what you learned, until you can state precedent concretely
+   or are satisfied there is none.
+
+Then fill `sources` with the pages you actually retrieved — never a URL you did
+not open, and never one you assembled from memory. An invented citation is
+worse than reporting that you found nothing.
+"""
+)
+
+
+def build_fandom(tools: list | None = None) -> LlmAgent:
+    """The Fandom agent, with Parallel's MCP tools when they are available.
+
+    With tools it searches for itself, because finding precedent is iterative:
+    a controversy is discovered, then read, then traced. Without them it judges
+    sources the orchestrator retrieved. Same schema either way, so the rest of
+    the system does not care which path ran.
+    """
     return LlmAgent(
         name="fandom",
         model=MODEL,
         description="Assesses audience flashpoint risk from documented precedent.",
-        instruction=FANDOM_INSTRUCTION,
+        instruction=FANDOM_MCP_INSTRUCTION if tools else FANDOM_INSTRUCTION,
         output_schema=FandomResult,
         output_key="fandom_check",
+        tools=tools or [],
     )

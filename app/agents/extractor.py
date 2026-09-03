@@ -46,6 +46,11 @@ assertion that could be checked against the real world.
 Extract claims of these kinds:
 - factual     — a checkable statement about the world
 - historical  — period accuracy: technology, dress, language, customs, events
+- canon       — a detail the production's own bible speaks to. Only use this
+                when a bible is supplied below and actually mentions the
+                subject: a character's weapon, a location's layout, what was
+                established in an earlier episode. Checked against the bible,
+                never against the web.
 - rights      — named music, footage, trademarks, real people's likenesses
 - fandom      — subject matter this audience is known to scrutinise closely,
                 especially anything politically or culturally sensitive
@@ -60,6 +65,11 @@ Rules:
 - Do not extract pure emotion, blocking, or dialogue subtext — those aren't
   checkable.
 - Aim for 3-8 claims on a typical scene.
+
+If a production bible is supplied, read it first and extract a `canon` claim
+for every scene detail it speaks to — whether the scene agrees with it or not.
+Agreement still needs checking; that is the whole point of continuity. If no
+bible is supplied, never use `canon`.
 
 Always consider whether a `fandom` claim applies. Any scene touching a real
 historical period, a real people, a contested territory, a religion, or a
