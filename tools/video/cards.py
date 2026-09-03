@@ -37,7 +37,7 @@ from playwright.sync_api import sync_playwright
 
 HERE = pathlib.Path(__file__).parent
 OUT = HERE / "capture" / "aux"
-DIAGRAM = HERE.parent.parent / "docs" / "sceneroom-agents.html"
+SEQUENCE = HERE.parent.parent / "docs" / "sceneroom-run.html"
 
 W, H = 1440, 900
 
@@ -77,6 +77,37 @@ PROBLEM = SHELL + """
 </div>
 """
 
+EDGE = SHELL + """
+<style>
+  .cols { display:grid; grid-template-columns:1fr 1fr; gap:0; margin-top:26px;
+          border:1px solid #2d2b2b; border-radius:3px; overflow:hidden; }
+  .col { padding:24px 26px; }
+  .col + .col { border-left:1px solid #2d2b2b; background:rgba(56,166,207,.05); }
+  .col h2 { font-family:'Courier Prime',monospace; font-size:12px; letter-spacing:.2em;
+            text-transform:uppercase; font-weight:700; margin-bottom:14px; }
+  .col li { font-size:19px; line-height:1.55; color:#9b9797; list-style:none; margin-bottom:9px; }
+  .col li b { color:#ece8e4; font-weight:600; }
+</style>
+<div class="wrap">
+  <span class="eyebrow">What everyone builds &middot; what nobody ships</span>
+  <h1>Checking a claim is the commodity.<br>The <em>record</em> is the product.</h1>
+  <div class="cols">
+    <div class="col">
+      <h2 style="color:#7d7979">Any model with search</h2>
+      <li>Tells you a claim looks wrong</li>
+      <li>Rules on it, including disputes</li>
+      <li>Leaves nothing behind</li>
+    </div>
+    <div class="col">
+      <h2 class="live">Sceneroom</h2>
+      <li><b>Writes the scene</b>, then makes it prove itself</li>
+      <li><b>Refuses to rule</b> on contested history &mdash; routes it</li>
+      <li><b>Appends every call</b>: source, decider, reason</li>
+    </div>
+  </div>
+</div>
+"""
+
 # The real output of `uv run python evals/run_eval.py --compare`, before and
 # after the instruction fix. Nothing here is invented.
 EVAL = SHELL + """
@@ -97,12 +128,11 @@ EVAL = SHELL + """
     <table>
       <tr><td class="lbl">processor</td><td class="n lbl">correct</td>
           <td class="n lbl">missed</td><td class="n lbl">wrong</td></tr>
-      <tr><td class="hi">base</td><td class="n hi">10 / 15</td>
-          <td class="n amber">5</td><td class="n live">0</td></tr>
-      <tr><td class="hi">pro</td><td class="n hi">13 / 15</td>
-          <td class="n amber">1</td><td class="n flag">1 &nbsp;←</td></tr>
-      <tr><td class="hi">pro, after the fix</td><td class="n hi">12 / 15</td>
-          <td class="n amber">3</td><td class="n live">0</td></tr>
+      <tr><td class="hi">base &nbsp;<span class="live">— shipped</span></td>
+          <td class="n hi">9 / 15</td>
+          <td class="n amber">6</td><td class="n live">0</td></tr>
+      <tr><td class="hi">pro</td><td class="n hi">11 / 15</td>
+          <td class="n amber">3</td><td class="n flag">1 &nbsp;←</td></tr>
     </table>
   </div>
   <p class="note">
@@ -121,48 +151,62 @@ def shot(page, html: str, path: pathlib.Path, seconds: float) -> None:
     print(f"  {path.name}")
 
 
+def record(browser, name: str, seconds: float, drive) -> None:
+    """Record one aux shot. `drive` gets the page and does whatever it needs."""
+    ctx = browser.new_context(
+        viewport={"width": W, "height": H},
+        record_video_dir=str(OUT), record_video_size={"width": W, "height": H},
+        device_scale_factor=2)
+    page = ctx.new_page()
+    drive(page)
+    page.wait_for_timeout(int(seconds * 1000))
+    video = page.video.path()
+    ctx.close()
+    pathlib.Path(video).replace(OUT / f"{name}.webm")
+    print(f"  {name}.webm")
+
+
+def diagram(page, views: tuple[str, ...], each: int) -> None:
+    """Open the sequence diagram and step it through its own guided views."""
+    page.goto(f"file://{SEQUENCE}", wait_until="networkidle")
+    page.wait_for_timeout(2000)
+    # The diagram opens light; the rest of the film is dark, and a white flash
+    # mid-cut reads as a different product. Toggle until it agrees.
+    for _ in range(3):
+        if page.evaluate("document.documentElement.getAttribute('data-theme')") == "dark":
+            break
+        page.click("#btn-theme")
+        page.wait_for_timeout(700)
+    else:
+        print("  (theme stayed light)")
+    page.wait_for_timeout(800)
+    for label in views:
+        b = page.locator("button").filter(has_text=label)
+        if b.count():
+            b.first.click()
+        else:
+            print(f"  (no view button for {label!r})")
+        page.wait_for_timeout(each)
+
+
 def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     with sync_playwright() as p:
         browser = p.chromium.launch()
 
-        for beat, html, secs in (("problem", PROBLEM, 22), ("eval", EVAL, 26)):
-            ctx = browser.new_context(
-                viewport={"width": W, "height": H},
-                record_video_dir=str(OUT), record_video_size={"width": W, "height": H},
-                device_scale_factor=2)
-            page = ctx.new_page()
-            shot(page, html, OUT / f"{beat}.webm", secs)
-            video = page.video.path()
-            ctx.close()
-            pathlib.Path(video).replace(OUT / f"{beat}.webm")
+        for beat, html, secs in (
+            ("problem", PROBLEM, 20),
+            ("edge", EDGE, 22),
+            ("eval", EVAL, 24),
+        ):
+            record(browser, beat, secs, lambda pg, h=html: pg.set_content(h))
 
-        # The architecture diagram, driven through its own guided views.
-        ctx = browser.new_context(
-            viewport={"width": W, "height": H},
-            record_video_dir=str(OUT), record_video_size={"width": W, "height": H},
-            device_scale_factor=2)
-        page = ctx.new_page()
-        page.goto(f"file://{DIAGRAM}", wait_until="networkidle")
-        page.wait_for_timeout(2500)
-        views = page.locator("[data-view], .view-chip, button:has-text('Play story')")
-        try:
-            chips = page.locator("button").filter(has_text="Draft and extract")
-            if chips.count():
-                for label in ("Draft and extract", "Where evidence c", "Who decides"):
-                    b = page.locator("button").filter(has_text=label)
-                    if b.count():
-                        b.first.click()
-                        page.wait_for_timeout(5200)
-            else:
-                page.wait_for_timeout(16000)
-        except Exception as exc:
-            print(f"  (diagram views not driven: {exc})")
-            page.wait_for_timeout(12000)
-        print(f"  architecture.webm  (views: {views.count()})")
-        video = page.video.path()
-        ctx.close()
-        pathlib.Path(video).replace(OUT / "architecture.webm")
+        # The walkthrough is the whole pass; the Parallel beat is the one view
+        # that shows where evidence actually comes from.
+        record(browser, "walkthrough", 2,
+               lambda pg: diagram(pg, ("Draft and extract", "The human decision"), 9000))
+        record(browser, "parallel", 2,
+               lambda pg: diagram(pg, ("Where evidence comes from",), 18000))
 
         browser.close()
     return 0

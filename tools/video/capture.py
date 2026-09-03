@@ -135,9 +135,12 @@ def run(base: str, headed: bool) -> int:
 
         d = Director(page, lengths, t0=recording_started)
 
-        # 1 — the problem. Nothing to show yet; the empty room is the shot.
-        d.beat("problem")
-        d.hold()
+        # 1 — the cold open: the problem, the edge, the shape of a pass, and
+        # where evidence comes from. All four are cards or the sequence
+        # diagram; the empty room is not the shot for any of them.
+        for opener in ("problem", "edge", "walkthrough", "parallel"):
+            d.beat(opener)
+            d.hold()
 
         # 2 — the brief, typed for real so it reads as a person working.
         d.beat("brief")
@@ -235,10 +238,6 @@ def run(base: str, headed: bool) -> int:
 
         # 8 — the eval. Shown as the terminal output, not the app.
         d.beat("eval")
-        d.hold()
-
-        # 9 — the architecture diagram.
-        d.beat("architecture")
         d.hold()
 
         # 10 — the payoff frame.

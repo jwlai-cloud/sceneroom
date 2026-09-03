@@ -31,36 +31,62 @@ BEATS: list[dict] = [
         "hold": 5,
         "text": (
             "In June, a Korean drama apologised on air and cut scenes after "
-            "broadcast. Viewers had caught errors the production missed. But the "
-            "errors were not the real problem. Nobody could tell which deviations "
-            "were deliberate. Bridgerton is anachronistic on purpose. Informed is "
-            "not accidental."
+            "broadcast. Viewers caught errors the production missed. But nobody "
+            "could tell which deviations were deliberate."
+        ),
+    },
+    {
+        "id": "edge",
+        "hold": 7,
+        "text": (
+            "Fact-checking is a commodity. Any model with search does a version "
+            "of it. What nobody ships is the record — what was checked, against "
+            "which source, decided by whom, and why. Sceneroom writes the scene, "
+            "then makes it prove itself."
+        ),
+    },
+    {
+        "id": "walkthrough",
+        "hold": 8,
+        "text": (
+            "The shape is one pass. A brief becomes a draft. The draft becomes a "
+            "list of checkable claims. Every claim gets evidence, a verdict, and "
+            "a route. What the room cannot settle goes to a human."
+        ),
+    },
+    {
+        "id": "parallel",
+        "hold": 8,
+        "text": (
+            "Evidence comes from Parallel, two ways. The pipeline searches, then "
+            "hands the Verifier those sources and nothing else — a model that "
+            "cannot search cannot invent a citation. One agent gets Parallel's "
+            "MCP server, to search and read for itself."
         ),
     },
     {
         "id": "brief",
         "hold": 5,
         "text": (
-            "Sceneroom. A writer gives a brief — Seoul, nineteen sixty-three — and "
-            "the production bible, so the room knows our own canon."
+            "A writer gives a brief — Seoul, nineteen sixty-three — and the "
+            "production bible, so the room knows our canon."
         ),
     },
     {
         "id": "crew-start",
         "hold": 7,
         "text": (
-            "Seven agents go to work, and you watch them do it. The writer drafts. "
-            "The extractor pulls out every claim that can be checked."
+            "Seven agents go to work, and you watch them. The writer drafts. The "
+            "extractor pulls out every checkable claim."
         ),
     },
     {
         "id": "crew-checks",
         "hold": 9,
         "text": (
-            "Then three agents ask three different questions. Is it true — against "
-            "the live web, through Parallel. Does using it need permission. And "
-            "what has this audience already argued about? That one uses Parallel's "
-            "MCP server to search and read for itself."
+            "Then three agents ask three different questions. Is it true. Does "
+            "using it need permission. And what has this audience already argued "
+            "about?"
         ),
     },
     {
@@ -105,8 +131,8 @@ BEATS: list[dict] = [
         "text": (
             "Three answers, not two. Fix it, and the scene is rewritten then checked "
             "again, so a correction cannot smuggle in a new error. Escalate. Or keep "
-            "it deliberately — licence recorded as a choice, with the real fact "
-            "beside it. The reason is required. The reason is the product."
+            "it deliberately, with the real fact beside it. The reason is required. "
+            "The reason is the product."
         ),
     },
     {
@@ -114,48 +140,34 @@ BEATS: list[dict] = [
         "hold": 7,
         "text": (
             "Every verdict and decision is appended to BigQuery. Append-only, "
-            "because a record you can edit is not provenance. And you can hand it "
-            "over as a document."
+            "because a record you can edit is not provenance. You can hand it over."
         ),
     },
     {
         "id": "eval",
         "hold": 9,
         "text": (
-            "We built an evaluation set: fifteen claims with known answers. It told "
-            "us what we did not want to hear. Our better search setting scored "
-            "higher — and ruled on a live historical dispute. The one thing this "
-            "must never do. Fixed: zero wrong calls. Some claims still come back "
-            "unverifiable, and that is fine. Unverifiable costs a decision. A wrong "
-            "call ships an error."
-        ),
-    },
-    {
-        "id": "architecture",
-        "hold": 8,
-        "text": (
-            "Seven Gemini agents on Vertex, orchestrated deterministically. "
-            "Retrieval lives in the pipeline, not the models, so citations cannot be "
-            "hallucinated. And whether a claim reaches a human is not a prompt. It is "
-            "a pure function, unit tested. A guarantee written as a prompt is not a "
-            "guarantee."
+            "Fifteen claims with known answers, run as an eval. It told us what we "
+            "did not want to hear: the better search setting scores higher, and "
+            "ruled on a live historical dispute. The one thing this must never do. "
+            "We ship the setting with zero wrong calls."
         ),
     },
     {
         "id": "frame",
         "hold": 7,
         "text": (
-            "One frame of the scene as signed off. Look at what she is holding. That "
-            "handie-talkie is the anachronism the writer chose to keep. The picture "
-            "shows the decision. The ledger says why."
+            "One frame of the scene as signed off. Look at what she is holding — the "
+            "anachronism the writer chose to keep. The picture shows the decision."
         ),
     },
     {
         "id": "close",
         "hold": 5,
         "text": (
-            "Sceneroom does not promise your scene is correct. It promises no claim "
-            "shipped unreviewed."
+            "Routing to a human is not a prompt — it is a pure function, unit "
+            "tested. Sceneroom does not promise your scene is correct. It promises "
+            "no claim shipped unreviewed."
         ),
     },
 ]

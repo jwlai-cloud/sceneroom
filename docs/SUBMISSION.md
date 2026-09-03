@@ -6,11 +6,20 @@
 
 ---
 
+## Project name
+
+    Sceneroom — no unreviewed claim ships
+
 ## Elevator pitch
 
-_A scene room that writes with you and makes every deviation from reality a
-deliberate choice on the record — instead of an accident someone finds after it
-airs._
+_(195 chars, fits Devpost's 200)_
+
+    A scene room that writes, then refuses to let the scene ship unchecked. It
+    never adjudicates contested history — it escalates. You get a
+    production-ready scene and the record of who decided what.
+
+**Thumbnail:** [`sceneroom-thumbnail.jpg`](sceneroom-thumbnail.jpg) — 1200×800,
+pulled from the demo at the payoff frame.
 
 ---
 
@@ -171,15 +180,22 @@ Fifteen claims with known answers, two of them genuinely disputed. The two error
 types are scored separately, because they are not equally bad — a *miss* costs
 the writer a decision, a *wrong call* ships an error.
 
-    base   10/15 correct · 5 missed · 0 wrong
-    pro    13/15 correct · 1 missed · 1 WRONG   <- ruled on a live dispute
-    after  12/15 correct · 3 missed · 0 wrong
+    base   9/15 correct · 6 missed · 0 wrong    <- shipped
+    pro   11/15 correct · 3 missed · 1 WRONG    <- ruled on a live dispute
 
 We had been telling ourselves the better search setting was simply better. It
 scored higher **and** ruled on whether Sejong invented Hangul unaided — which
 specialists genuinely dispute, and which is the one thing this product must
-never do. The fix was an instruction, not a model. We traded one correct answer
-for zero wrong calls, and that is the right trade here.
+never do.
+
+We fixed that once with an instruction, and it held. Then we re-ran the eval the
+day before submitting, and the wrong call was back: the open web had moved under
+us, and the same setting was again ruling on a live dispute. The eval is the only
+reason we knew. Production now runs the setting that makes **zero wrong calls**,
+and pays for it with six claims that come back unverifiable.
+
+That is the trade this product exists to make. A miss costs the writer a
+decision. A wrong call ships an error under our name.
 
 ## Accomplishments
 
