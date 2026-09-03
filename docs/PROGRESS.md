@@ -3,8 +3,8 @@
 _Deadline **2026-09-07 14:00 PT**. Judging **2026-09-23 → 10-07**, so the URL
 must survive into October._
 
-**Live:** <https://sceneroom-320877670799.us-central1.run.app> · access code is
-on the submission page · revision `sceneroom-00025-gm8`
+**Live:** <https://sceneroom-320877670799.us-central1.run.app/?key=jongno-1963-50f10b> · access code is
+on the submission page · revision `sceneroom-00026-nmq`
 
 ## Done
 
@@ -21,7 +21,7 @@ on the submission page · revision `sceneroom-00025-gm8`
 | Secret Manager + least privilege | no key material in the container; dataset-scoped WRITER |
 | Access gate | cookie-based, guards the five endpoints that spend money |
 | One payoff frame | `gemini-3.1-flash-image`, only once nothing is open |
-| Tests | 49 unit, ruff clean |
+| Tests | 50 unit, ruff clean |
 | Docs | `ARCHITECTURE.md`, 7 ADRs, `SUBMISSION.md`, `VIDEO.md` |
 | Devpost thumbnail | `docs/sceneroom-thumbnail.jpg`, 1200×800 |
 | Teaching artefact | `tutorial.html` — navigable page, + `TUTORIAL.md` |

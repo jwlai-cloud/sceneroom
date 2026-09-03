@@ -27,7 +27,12 @@ from collections.abc import AsyncIterator, Awaitable, Callable
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.encoders import jsonable_encoder
-from fastapi.responses import FileResponse, PlainTextResponse, StreamingResponse
+from fastapi.responses import (
+    FileResponse,
+    PlainTextResponse,
+    RedirectResponse,
+    StreamingResponse,
+)
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -119,12 +124,8 @@ def access_state(request: Request) -> dict:
 
 
 @app.post("/api/access")
-def unlock(req: AccessRequest, response: Response) -> dict:
-    if not ACCESS_CODE:
-        return {"unlocked": True}
-    if not _code_matches(req.code.strip()):
-        # Deliberately no detail about why. Same message, every failure.
-        raise HTTPException(401, "That code was not recognised.")
+def _grant(response: Response) -> None:
+    """Mark this browser as admitted. One definition, two entry paths."""
     response.set_cookie(
         ACCESS_COOKIE,
         ACCESS_CODE,
@@ -133,6 +134,15 @@ def unlock(req: AccessRequest, response: Response) -> dict:
         secure=True,
         samesite="strict",
     )
+
+
+def unlock(req: AccessRequest, response: Response) -> dict:
+    if not ACCESS_CODE:
+        return {"unlocked": True}
+    if not _code_matches(req.code.strip()):
+        # Deliberately no detail about why. Same message, every failure.
+        raise HTTPException(401, "That code was not recognised.")
+    _grant(response)
     return {"unlocked": True}
 
 
@@ -435,7 +445,20 @@ if FRONTEND.is_dir():
     app.mount("/static", RevalidatingStatic(directory=str(FRONTEND)), name="static")
 
     @app.get("/")
-    def index() -> FileResponse:
+    def index(key: str | None = None) -> Response:
+        """The room, or a one-click admission.
+
+        `?key=<code>` exists because a submission form has nowhere to put an
+        access code: a judge gets a link that works, not an instruction to type
+        something they have to go and find. On a match the cookie is set and the
+        browser is redirected to a clean `/`, so the code leaves the address bar
+        immediately and appears in one request log line rather than every one.
+        A wrong key is not an error — it simply falls through to the gate.
+        """
+        if key and ACCESS_CODE and _code_matches(key.strip()):
+            redirect = RedirectResponse("/", status_code=303)
+            _grant(redirect)
+            return redirect
         return FileResponse(
             str(FRONTEND / "index.html"), headers={"Cache-Control": "no-cache"}
         )

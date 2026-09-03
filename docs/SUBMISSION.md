@@ -1,7 +1,11 @@
 # Sceneroom — Devpost submission
 
-**Live:** <https://sceneroom-320877670799.us-central1.run.app>
-**Access code:** `jongno-1963-50f10b` _(each run spends on Gemini and Parallel, so the room is gated)_
+**Live (one click, no code to type):**
+<https://sceneroom-320877670799.us-central1.run.app/?key=jongno-1963-50f10b>
+
+The room is gated because every run spends real money on Gemini and Parallel —
+`?key=` sets the cookie and redirects to a clean URL. If you land on the gate
+instead, the code is `jongno-1963-50f10b`.
 **Track:** Parallel · **Repo:** <https://github.com/jwlai-cloud/sceneroom>
 
 ---
